@@ -33,9 +33,10 @@ func PrintFinalConfiguration(myConfig MinionConfig) {
 	fmt.Printf("Blank page text: %s\n", myConfig.BlankPageText)
 }
 
-// PrintVersion displays the current version of the application, the value is defined in main.go
+// PrintVersion displays the current version and build information of the application
 func PrintVersion() {
-	fmt.Printf("PDFMinion Version: %s\n", AppVersion)
+	fmt.Printf("PDFMinion Version: %s\n", GetVersion())
+	fmt.Printf("Built: %s on %s\n", buildTime, buildPlatform)
 }
 
 // GiveCredits prints a list of credits to the console in coloured output
