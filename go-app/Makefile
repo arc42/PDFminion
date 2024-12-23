@@ -25,14 +25,8 @@ VERSION=$(shell grep -E "const appVersion = \"[^\"]+\"" cmd/pdfminion/main.go | 
 
 # Build flags
 LDFLAGS=-ldflags "-s -w \
-    -X 'pdfminion/internal/cli.buildTime=$(BUILDTIME)' \
-    -X 'pdfminion/internal/cli.buildPlatform=$(BUILD_PLATFORM)' \
-    -X 'pdfminion/internal/cli.appVersion=$(VERSION)'"
-
-# Build flags
-LDFLAGS=-ldflags "-s -w \
-   -X 'pdfminion/internal/cli.buildTime=$(BUILDTIME)' \
-   -X 'pdfminion/internal/cli.buildPlatform=$(BUILD_PLATFORM)'"
+    -X 'pdfminion/internal/domain.buildTime=$(BUILDTIME)' \
+    -X 'pdfminion/internal/domain.buildPlatform=$(BUILD_PLATFORM)'"
 
 # Platform specific settings
 WINDOWS_AMD64=windows-amd64

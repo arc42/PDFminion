@@ -7,29 +7,6 @@ import (
 	"os"
 )
 
-// Version and build information
-var (
-	version       = "0.0.0" // default version, to be set by SetVersion
-	buildTime     = "unknown"
-	buildPlatform = "unknown"
-)
-
-// SetVersion sets the application version
-func SetVersion(v string) {
-	version = v
-}
-
-// GetVersion returns the current version
-func GetVersion() string {
-	return version
-}
-
-// SetBuildInfo sets the build time and platform
-func SetBuildInfo(time, platform string) {
-	buildTime = time
-	buildPlatform = platform
-}
-
 const (
 	MinionConfigFileName = "pdfminion.yaml"
 
