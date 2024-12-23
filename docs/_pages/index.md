@@ -191,40 +191,53 @@ readability, and prominence, aligning with classic book design practices.
 
 <h1>Usage</h1>
 
+<h2>Terminology and Conventions</h2>
 
-<h2>Basic Commands</h2>
+* **Commands** are executed immediately. They are given without `--`, for example `pdfminion version`
+* **Flags** (_configuration settings_) control the behaviour of the actual processing. They are given with `--`, for example `pdfminion --force` or `pdfminion --source ./input`
+* Configurations (_flags_) can also be set via configuration file.
 
-| **Name**  | **Long Command**  | **Short Command** | **Description**    |
+<h2>Commands</h2>
+
+| **Name**  | **Long Name**  | **Shorthand** | **Description** |
+|-----------|-------------------|-------------------|-----------------|
+| **Help**          | `help`      | `h`, `?`| Displays a list of supported commands and their usage.<br>Example: `pdfminion --help`|
+| **List Languages**| `list-languages` | `ll`   | Lists all available languages for the `--language` option.<br>Example: `pdfminion list-languages` |
+| **Settings**      | `settings`  |         | Prints all current settings, like page-prefix, chapter-prefix etc. <br>Example: `pdfminion settings` |
+| **Version**       | `version`   | `v`    | Displays the current version of PDFminion.<br>Example: `pdfminion version` |
+| **Credits**       | `credits`   |         | Gives credit to the maintainers of several OS libraries. <br>Example: `pdfminion credits`  |
+
+If no command is given, normal PDF processing is started, and all flags are evaluated.
+
+<h2>Basic Settings</h2>
+
+| **Name**  | **Long Name**  | **Shorthand** | **Description**    |
 |-----------|-------------------|-------------------|--------------------|
-| **Source Directory**     | `--source <directory>`     | `-s <directory>`        | Specifies the input directory for PDF files. Example: `pdfminion --source ./input`|
-| **Target Directory**     | `--target <directory>`     | `-t <directory>`        | Specifies the output directory for processed files. Creates the directory if it doesn’t exist. Example: `pdfminion --target ./out`|
-| **Force Overwrite**      | `--force`                  | `-f`                    | Allows overwriting existing files in the target directory. Example: `pdfminion --force` |
+| **Source Directory** | `--source <directory>` | `-s <directory>`| Specifies the input directory for PDF files. Default is `./_pdfs` Example: `pdfminion --source ./input`|
+| **Target Directory** | `--target <directory>` | `-t <directory>` | Specifies the output directory for processed files. Default is `_target`. Creates the directory if it doesn’t exist. Example: `pdfminion --target ./out`|
+| **Force Overwrite**  | `--force`              | `-f`    | Allows overwriting existing files in the target directory. Example: `pdfminion --force` |
+| **Config File**  | `--config <filename>`  | `-c <filename>` | Loads configuration from a file. It needs to be a yaml file. Example: `pdfminion --config settings.yaml`  |
+| **Debug Mode**    | `--debug`     |                | Enables debug mode for detailed logs. Example: `pdfminion --debug` |
 
+See the [example config](#exampleconfig) for an extensive sample.
 
-<h2>Processing Commands</h2>
+<h2>Page Related Settings</h2>
 
 Set the running head, the page- and chapter prefix etc.
 
-| **Name**  | **Long Command**  | **Short Command** | **Description**    |
+| **Name**  | **Long Name**  | **Shorthand** | **Description**    |
 |-----------|-------------------|-------------------|--------------------|
-| **Running Head**         | `--running-head <text>`    | | Sets text for the running head at the top of each page. Example: `pdfminion --running-head "Document Title"`|
-| **Chapter Prefix**       | `--chapter-prefix <text>`  | | Specifies prefix for chapter numbers. Default: "Chapter". Example: `pdfminion --chapter-prefix "Ch."`|
-| **Page Prefix**          | `--page-prefix <text>`     | | Sets prefix for page numbers. Default: "Page". Example: `pdfminion --page-prefix "Page"` |
-| **Separator**            | `--separator <symbol>`     |  | Defines the separator between chapter, page number, and total count. Default: `-`. Example: `pdfminion --separator " | "`        |
-| **Page Count Prefix**    | `--page-count-prefix <text>`| | Sets prefix for total page count. Default: "of". Example: `pdfminion --page-count-prefix "out of"` |
-| **Evenify**  | `--evenify {on\|off}`  | `-e {on\|off}`  | Enables or disables adding blank pages for even page counts. Example: `pdfminion --evenify=off |
+| **Running Head**    | `--running-head <text>`    | `-r` | Sets text for the running head at the top of each page. Default  is "" (no header). Example: `pdfminion --running-head "Document Title"`|
+| **Chapter Prefix**  | `--chapter-prefix <text>`  | `-c` | Specifies prefix for chapter numbers. Default: "Chapter". Example: `pdfminion --chapter-prefix "Ch."`|
+| **Page Prefix**     | `--page-prefix <text>`     | `-p` | Sets prefix for page numbers. Default: "Page". Example: `pdfminion --page-prefix "Page"` |
+| **Separator**       | `--separator <symbol>`     |  | Defines the separator between chapter, page number, and total count. Default: `-`. Example: `pdfminion --separator " | "`        |
+| **Page Count Prefix**  | `--page-count-prefix <text>`|  | Sets prefix for total page count. Default: "of". Example: `pdfminion --page-count-prefix "out of"` |
+| **Evenify**  | `--evenify {=true\|false}`  | `-e {=true\|false}`  | Enables or disables adding blank pages for even page counts. Default: true.  Example: `pdfminion --evenify=false |
 | **Personal Touch**  | `--personal {on\|off}`  |   | Adds a personal touch (aka: Our PDFminion logo) on random pages. Not yet implemented. |
 
+Please note: Most of these processing defaults are language-specific: The German language, for example, uses "Seite" for "Page" and "Kapitel" for "Chapter".
 
-<h2>Information</h2>
 
-| **Name**  | **Long Command**  | **Short Command** | **Description** |
-|-----------|-------------------|-------------------|-----------------|
-| **Help**        | `--help`      | `-h`, `-?`, `?`| Displays a list of supported commands and their usage. Example: `pdfminion --help`|
-| **Version**     | `--version`   | `-v`           | Displays the current version of PDFminion. Example: `pdfminion --version` |
-| **Thanx**       | `--thanx`     | `-tx`          | Gives credit to the maintainers of several OS libraries. Example: `pdfminion --thanx`.  |
-| **Defaults**    | `--defaults`  |                | Prints all current default settings. Example: `pdfminion --defaults`.  |
-| **Debug Mode**  | `--debug`     |                | Enables debug mode for detailed logs. Example: `pdfminion --debug`    |
 
 
 <h2>Multi-Language Support</h2>
@@ -233,23 +246,21 @@ PDFMinion provides defaults for page processing for several languages.
 With these commands you can change these defaults and provide your own values.
 
 
-| **Name**| **Long Command**  | **Short Command** | **Description** |
+| **Name**| **Long Name**  | **Shorthand** | **Description** |
 |-----------|-------------------|-------------------|-----------------|
-| **List Languages**| `--list-languages` | `-ll` | Lists all available languages for the `--language` option. Example: `pdfminion --list-languages` |
-| **Language**      | `--language <code>`        | `-l <code>`     | Sets the language for stamped text. Supports `EN` (English) and `DE` (German). Default: `EN`. Example: `pdfminion --language DE` |
+| **Language**      | `--language <code>`        | `-l <code>`     | Sets the language for stamped text. Currently supports `EN` (English) and `DE` (German). Default: `EN`. Example: `pdfminion --language DE`. You get all supported languages with the `--list-languages` command. |
 | **Blank Page Text** | `--blankpagetext <text>`   | `-b <text>`     | Specifies text printed on blank pages added during evenification. Example: `pdfminion --blankpagetext "deliberately left blank"`|
 
 
 
 
-<h2>File-Related Commands</h2>
-After all files have been processed, you may merge them or create a table-of-contents.
+<h2>File-Related Settings</h2>
+After all files have been processed, PDFminion can perform some post-processing.
 
-| **Name**  | **Long Command**  | **Short Command** | **Description** |
+| **Name**  | **Long Name**  | **Shorthand** | **Description** |
 |-----------|-------------------|-------------------|-----------------|
 | **Merge** | `--merge <filename>`       | `-m <filename>` | Merges input files into a single PDF. Uses default name if `<filename>` not provided. Not yet implemented. Example: `pdfminion --merge combined.pdf`   |
 | **Table of Contents**  | `--toc`   |  | Generates a table-of-contents PDF. Not yet implemented. Example: `pdfminion --toc`|
-| **Config File**  | `--config <filename>`  | `-c <filename>` | Loads configuration from a file. Overrides conflicting command-line options. Example: `pdfminion --config settings.json`  |
 
 
 
@@ -267,17 +278,29 @@ After all files have been processed, you may merge them or create a table-of-con
 
 
 
-> **Example 1**: Add page numbers and running headers to all PDF files in the `input` directory and save the processed files in the `output` directory. Requires the `output` to be empty!
+> **Example 1**: Default processing: Add page numbers and running headers to all PDF files in the `input` directory and save the processed files in the `output` directory. Requires the `output` to be empty!
+>
+>`$ pdfminion --source ./input --target ./output`
+>
+<hr>
 
-```shell
-$ pdfminion --source ./input --target ./output
-```
+> **Example 2**: Force overwrite of existing files in the `output` directory
+>
+>`$ pdfminion --force --source ./input --target ./output`
+>
 
-> **Example 2**: Force overwrite of existing files in the `output` directory  
+> **Example 3**: Show all default settings for current language setting
+>
+>`$ pdfminion defaults`
+>
 
-```shell
-$ pdfminion --force --source ./input --target ./output
-```
+<hr>
+> **Example 4**: Show the version info
+>
+>`$ pdfminion version`
+>
+<hr>
+
 
 > **Example 41**: Gives credit to the maintainers of the open-source libraries used by PDFminion, e.g. [pdfcpu](https://pdfcpu.io/) and a few others..
 
@@ -309,7 +332,11 @@ PDFminion uses numerous open-source libraries, and wish to thank the maintainers
 
 * Horst Rutter for [pdfcpu](https://pdfcpu.io/), all things related to PDF processing.
 * Hao Ding for [go-locale](https://github.com/Xuanwo/go-locale) to handle tricky locale settings.
-
+* [Steve Francia](https://spf13.com) for a lot of stuff, including [cobra](github.com/spf13/cobra) and [viper](github.com/spf13/viper).
+* [Max Howell](https://brew.sh) for creating Homebrew, the package manager for MacOS.
+* [Tom Preston-Werner & Co.](https://jekyllrb.com) for creating Jekyll, the static site generator.
 * and, of course, the [Go team](https://golang.org/) for creating the language that compiles to various operating systems,
     and refrains from adding fancy features every 6 month (pun intended).
+    and refrains from adding fancy features every 6 month (pun intended).
 </section>
+

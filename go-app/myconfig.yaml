@@ -1,0 +1,17 @@
+# PDFminion Configuration for German Users
+
+# General settings
+sourceDir: ./s1         # Source directory for input PDF files
+targetDir: ./t2         # Target directory for output PDF files
+force: false                 # Force processing even if checks fail
+evenify: false                # Ensure even number of pages in output PDFs
+merge: false                  # Merge all PDFs into a single file
+mergeFileName: gesamt.pdf    # Name of the merged output file
+
+# Page-related settings
+runningHeader: "Kopfzeile"         # Text for the running header on each page
+chapterPrefix: "Kapitel"           # Prefix for chapter numbers
+separator: "-"                     # Separator between chapter and page numbers
+pagePrefix: "Seite"                # Prefix for page numbers
+totalPageCountPrefix: "von"        # Prefix for total page count (e.g., "Seite 3 von 10")
+blankPageText: "Seite absichtlich frei gelassen." # Text for blank pages

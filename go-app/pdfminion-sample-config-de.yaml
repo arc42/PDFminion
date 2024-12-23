@@ -1,0 +1,19 @@
+# PDFminion Configuration for German Users
+
+# General settings
+language: de                 # Language for processing: "de" for German
+debug: false                 # Enable debug mode (true/false)
+sourceDir: ./source         # Source directory for input PDF files
+targetDir: ./target         # Target directory for output PDF files
+force: false                 # Force processing even if checks fail
+evenify: true                # Ensure even number of pages in output PDFs
+merge: false                  # Merge all PDFs into a single file
+mergeFileName: gesamt.pdf    # Name of the merged output file
+
+# Page-related settings
+runningHeader: "Kopfzeile"         # Text for the running header on each page
+chapterPrefix: "Kapitel"           # Prefix for chapter numbers
+separator: "-"                     # Separator between chapter and page numbers
+pagePrefix: "Seite"                # Prefix for page numbers
+totalPageCountPrefix: "von"        # Prefix for total page count (e.g., "Seite 3 von 10")
+blankPageText: "Seite absichtlich frei gelassen." # Text for blank pages

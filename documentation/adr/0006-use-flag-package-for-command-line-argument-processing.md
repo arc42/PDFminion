@@ -1,16 +1,20 @@
 # 6. Use Go's Standard `flag` Package for CLI Parsing
 
 Date: 2024-12-02
+updated: 2024-12-16
 
 ## Status
 
-accepted.
+superseeded by ADR-0008 (layered config handling).
 
 ## Context
 PDFminion requires a mechanism to parse and process command-line arguments for a variety of commands and options, such as `--source`, `--target`, `--language`, etc. Various libraries are available for CLI parsing in Go, including the standard `flag` package and third-party libraries like `cobra` or `urfave/cli`. This decision focuses on using the standard library's `flag` package.
 
 ## Decision
 We will use Go's standard `flag` package for CLI argument parsing and processing.
+
+Update 2024-12-16: As we need file-based configuration, the flag package is not versatile enough.
+
 
 
 ### Rationale
