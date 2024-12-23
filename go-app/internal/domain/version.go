@@ -8,7 +8,7 @@ import (
 
 // Version and build information
 var (
-	// appVersion is set by main.go during intialization
+	// appVersion is set by main.go during initialization
 	appVersion = "0.0.0"
 
 	// buildTime and buildPlatform are set by the build process (Makefile)
@@ -24,16 +24,12 @@ func SetAppVersion(v string) {
 func PrintVersion() {
 	fmt.Printf("PDFminion version %s\n", appVersion)
 	fmt.Printf("Built on: %s\n", buildPlatform)
-	if buildTime != "" {
-		t, err := time.Parse("2006 Jan 02 15:04", buildTime)
-		if err == nil {
-			formattedTime := formatBuildTime(t)
-			fmt.Printf("Build time: %s\n", formattedTime)
-		} else {
-			fmt.Printf("Build time: %s\n", buildTime)
-		}
+	t, err := time.Parse("2006 Jan 02 15:04", buildTime)
+	if err == nil {
+		formattedTime := formatBuildTime(t)
+		fmt.Printf("Build time: %s\n", formattedTime)
 	} else {
-		fmt.Println("Build time: Not available")
+		fmt.Printf("Build time: %s\n", buildTime)
 	}
 }
 

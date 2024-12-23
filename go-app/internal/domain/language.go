@@ -2,6 +2,7 @@ package domain
 
 import (
 	"github.com/Xuanwo/go-locale"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
 	"golang.org/x/text/language/display"
 	"os"
@@ -121,11 +122,18 @@ func PrintLanguages() {
 	currentLanguage := DetectSystemLanguage()
 	currentCode, currentNameInOriginal, currentNameInEnglish := GetLanguageName(currentLanguage)
 
-	println("Supported Languages:")
-	languages := ListAvailableLanguages()
-	for _, lang := range languages {
-		println("Code:", lang[0], ", Name:", lang[1], " (", lang[2], ")")
+	log.Info().Msg("Supported Languages:")
+	for _, lang := range ListAvailableLanguages() {
+		log.Info().
+			Str("code", lang[0]).
+			Str("name", lang[1]).
+			Str("english_name", lang[2]).
+			Msg("Language")
 	}
 
-	println("\nYour current language is", currentCode, "(", currentNameInOriginal, ",", currentNameInEnglish, ")")
+	log.Info().
+		Str("code", currentCode).
+		Str("native_name", currentNameInOriginal).
+		Str("english_name", currentNameInEnglish).
+		Msg("Current system language")
 }
