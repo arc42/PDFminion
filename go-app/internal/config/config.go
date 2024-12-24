@@ -59,12 +59,21 @@ func setupFlags() {
 	rootCmd.Flags().String("blank-page-text", "", "Text for blank pages")
 
 	// Mark required flags
-	rootCmd.MarkFlagRequired("source")
-	rootCmd.MarkFlagRequired("target")
+	if err := rootCmd.MarkFlagRequired("source"); err != nil {
+		log.Fatal().Err(err).Msg("Error marking 'source' flag as required.")
+	}
+	if err := rootCmd.MarkFlagRequired("target"); err != nil {
+		log.Fatal().Err(err).Msg("Error marking 'target' flag as required.")
+	}
 
 	// Bind all flags to viper
-	viper.BindPFlags(rootCmd.PersistentFlags())
-	viper.BindPFlags(rootCmd.Flags())
+	if err := viper.BindPFlags(rootCmd.PersistentFlags()); err != nil {
+		log.Fatal().Err(err).Msg("Failed to bind persistent flags to viper")
+	}
+
+	if err := viper.BindPFlags(rootCmd.Flags()); err != nil {
+		log.Fatal().Err(err).Msg("Failed to bind flags to viper")
+	}
 }
 
 func setupCommands() {
@@ -91,7 +100,10 @@ func setupCommands() {
 				// Override parent PersistentPreRun
 			},
 			Run: func(cmd *cobra.Command, args []string) {
-				rootCmd.Help()
+				if err := rootCmd.Help(); err != nil {
+					log.Error().Err(err).Msg("Error displaying help")
+					os.Exit(1)
+				}
 				os.Exit(0)
 			},
 		},
