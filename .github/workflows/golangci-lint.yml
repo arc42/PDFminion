@@ -13,6 +13,9 @@ permissions:
 jobs:
   golangci:
     name: lint
+    with:
+      version: latest
+      working-directory: ./go-app
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
