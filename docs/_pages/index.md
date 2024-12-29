@@ -193,9 +193,13 @@ readability, and prominence, aligning with classic book design practices.
 
 <h2>Terminology and Conventions</h2>
 
+<div markdown="1" class="left-aligned-section">
 * **Commands** are executed immediately. They are given without `--`, for example `pdfminion version`
+* Only the first command will be executed at a time.
 * **Flags** (_configuration settings_) control the behaviour of the actual processing. They are given with `--`, for example `pdfminion --force` or `pdfminion --source ./input`
-* Configurations (_flags_) can also be set via configuration file.
+* Configurations (_flags_) can also be set via a configuration file, either in users' home directory or in the current working directory.
+    The default name is `pdfminion.yaml` or `pdfminion.yml`. Other names can be specified with the `--config` flag.
+</div>
 
 <h2>Commands</h2>
 
@@ -217,7 +221,7 @@ If no command is given, normal PDF processing is started, and all flags are eval
 | **Target Directory** | `--target <directory>` | `-t <directory>` | Specifies the output directory for processed files. Default is `_target`. Creates the directory if it doesn’t exist. Example: `pdfminion --target ./out`|
 | **Force Overwrite**  | `--force`              | `-f`    | Allows overwriting existing files in the target directory. Example: `pdfminion --force` |
 | **Config File**  | `--config <filename>`  | `-c <filename>` | Loads configuration from a file. It needs to be a yaml file. Example: `pdfminion --config settings.yaml`  |
-| **Debug Mode**    | `--debug`     |                | Enables debug mode for detailed logs. Example: `pdfminion --debug` |
+| **Verbose Mode**    | `--verbose`     |                | Gives detailed processing output. Example: `pdfminion --verbose` |
 
 See the [example config](#exampleconfig) for an extensive sample.
 
@@ -332,11 +336,9 @@ PDFminion uses numerous open-source libraries, and wish to thank the maintainers
 
 * Horst Rutter for [pdfcpu](https://pdfcpu.io/), all things related to PDF processing.
 * Hao Ding for [go-locale](https://github.com/Xuanwo/go-locale) to handle tricky locale settings.
-* [Steve Francia](https://spf13.com) for a lot of stuff, including [cobra](github.com/spf13/cobra) and [viper](github.com/spf13/viper).
+* [Steve Francia](https://spf13.com) for a lot of stuff, including [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper), the command-line and configuration libraries.
 * [Max Howell](https://brew.sh) for creating Homebrew, the package manager for MacOS.
 * [Tom Preston-Werner & Co.](https://jekyllrb.com) for creating Jekyll, the static site generator.
-* and, of course, the [Go team](https://golang.org/) for creating the language that compiles to various operating systems,
-    and refrains from adding fancy features every 6 month (pun intended).
-    and refrains from adding fancy features every 6 month (pun intended).
+* and, of course, the [Go team](https://golang.org/) for creating the language that compiles to various operating systems, and refrains from adding fancy features every 6 month (pun intended).
 </section>
 

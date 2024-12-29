@@ -10,7 +10,7 @@ func PrintFinalConfiguration(myConfig MinionConfig) {
 	fmt.Printf("Source directory: %s\n", myConfig.SourceDir)
 	fmt.Printf("Target directory: %s\n", myConfig.TargetDir)
 	fmt.Printf("Language: %s\n", myConfig.Language)
-	fmt.Printf("Debug: %t\n", myConfig.Debug)
+	fmt.Printf("Verbose: %t\n", myConfig.Verbose)
 	fmt.Printf("Force: %t\n", myConfig.Force)
 	fmt.Printf("Evenify: %t\n", myConfig.Evenify)
 	fmt.Printf("Merge: %t\n", myConfig.Merge)
