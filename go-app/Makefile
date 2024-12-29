@@ -40,7 +40,7 @@ INSTALL_DIR=/usr/local/bin
 .PHONY: default all clean test compile-all run install uninstall release mac \
         compile-windows-amd64 compile-linux-amd64 compile-darwin-amd64 compile-darwin-arm64 \
         package-windows-amd64 package-linux-amd64 package-darwin-amd64 package-darwin-arm64 \
-        docker-test-linux
+        docker-test-linux lint
 
 
 # Directory targets
@@ -97,6 +97,9 @@ compile-darwin-amd64: $(OUTPUT_DIR)/$(BINARY_NAME)-$(DARWIN_AMD64)
 	-o $(OUTPUT_DIR)/$(BINARY_NAME)-$(DARWIN_AMD64)/$(BINARY_NAME) \
 	-v ./cmd/pdfminion
 
+lint:
+	@echo "Running golangci-lint..."
+	golangci-lint run
 
 # Shortcut for Apple Silicon build
 mac: compile-darwin-arm64

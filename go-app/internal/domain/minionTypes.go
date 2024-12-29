@@ -22,7 +22,7 @@ type MinionConfig struct {
 	// General settings
 	ConfigFileName string
 	Language       language.Tag
-	Debug          bool
+	Verbose        bool
 	SourceDir      string
 	TargetDir      string
 	Force          bool
@@ -43,10 +43,11 @@ type MinionConfig struct {
 
 // NewDefaultConfig creates a new configuration with default values
 func NewDefaultConfig() *MinionConfig {
+
 	return &MinionConfig{
 		ConfigFileName: MinionConfigFileName,
 		Language:       language.English,
-		Debug:          false,
+		Verbose:        false,
 		SourceDir:      "_pdfs",
 		TargetDir:      "_target",
 		Force:          false,
@@ -92,7 +93,7 @@ func (c *MinionConfig) MergeWith(other *MinionConfig) error {
 	}
 
 	// Boolean flags always override
-	c.Debug = other.Debug
+	c.Verbose = other.Verbose
 	c.Force = other.Force
 	c.Evenify = other.Evenify
 	c.Merge = other.Merge
@@ -100,6 +101,11 @@ func (c *MinionConfig) MergeWith(other *MinionConfig) error {
 	return nil
 }
 
+// Validate validates the configuration for semantic correctness:
+// - Source directory must exist
+// - Target directory shall be empty if it exists (unless --force is set), otherwise it will be created
+// - a given language must be available in the provided languages
+// - and more
 func (c *MinionConfig) Validate() error {
 	// Validate source directory
 	if err := c.validateSourceDir(); err != nil {
