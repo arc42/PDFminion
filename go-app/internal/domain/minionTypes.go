@@ -1,31 +1,41 @@
 package domain
 
 import (
-	"fmt"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
-	"io"
-	"os"
 )
 
 const (
 	MinionConfigFileName = "pdfminion.yaml"
 
-	// Default formatting settings
-	DefaultSourceDir     = "_pdfs"
-	DefaultTargetDir     = "_target"
-	PageNrPrefix         = ""
-	ChapterPrefix        = "Chapter"
-	ChapterPageSeparator = " - "
+	DefaultSourceDir       = "_pdfs"
+	DefaultTargetDir       = "_target"
+	DefaultPageNrPrefix    = "Page"
+	DefaultChapterPrefix   = "Chapter"
+	DefaultSeparator       = " - "
+	DefaultPageCountPrefix = "of"
+	DefaultBlankPageText   = "Intentionally left blank"
+	DefaultMergeFileName   = "merged.pdf"
 )
+
+// MinionConfig holds the configuration for the PDFMinion application
+// Several XYValid fields are used to check if the respective values hold valid values.
+// Certain operations are possible with invalid flags, as we can fall back to defaults.
+// However, some operations (like file I/O) require valid paths.
+// These XYValid fields are shown by the `settings` command.
+// They are set by the various validation functions.
 
 type MinionConfig struct {
 	// General settings
-	ConfigFileName string
-	Language       language.Tag
-	Verbose        bool
-	SourceDir      string
-	TargetDir      string
-	Force          bool
+	ConfigFileName      string
+	ConfigFileNameValid bool
+	Language            language.Tag
+	Verbose             bool
+	SourceDir           string
+	SourceDirValid      bool
+	TargetDir           string
+	TargetDirValid      bool
+	Force               bool
 
 	// Processing options
 	Evenify       bool
@@ -33,30 +43,55 @@ type MinionConfig struct {
 	MergeFileName string
 
 	// Page formatting
-	RunningHeader        string
-	ChapterPrefix        string
-	Separator            string
-	PagePrefix           string
-	TotalPageCountPrefix string
-	BlankPageText        string
+	RunningHeader   string
+	ChapterPrefix   string
+	Separator       string
+	PagePrefix      string
+	PageCountPrefix string
+	BlankPageText   string
+
+	// personal touch, adds funny logo to random pages
+	// TODO
+	PersonalTouch bool
+
+	// Metadata to track which fields were explicitly set
+	SetFields map[string]bool
 }
 
-// NewDefaultConfig creates a new configuration with default values
-func NewDefaultConfig() *MinionConfig {
+// NewDefaultConfig creates a new configuration with default values,
+// using the system language for texts
+func NewDefaultConfig(systemLanguage language.Tag) *MinionConfig {
+	log.Debug().Msg("Creating new default configuration")
+
+	// Get corresponding texts for the provided language
+	texts, exists := DefaultTexts[systemLanguage]
+	if !exists {
+		log.Debug().Str("language", systemLanguage.String()).Msg("Language not supported, falling back to English")
+		systemLanguage = language.English
+		texts = DefaultTexts[language.English]
+	}
 
 	return &MinionConfig{
+		Verbose:       false,
+		SourceDir:     DefaultSourceDir,
+		TargetDir:     DefaultTargetDir,
+		Force:         false,
+		Evenify:       true,
+		Merge:         false,
+		MergeFileName: DefaultMergeFileName,
+
 		ConfigFileName: MinionConfigFileName,
-		Language:       language.English,
-		Verbose:        false,
-		SourceDir:      "_pdfs",
-		TargetDir:      "_target",
-		Force:          false,
-		Evenify:        true,
-		Merge:          false,
-		MergeFileName:  "merged.pdf",
-		Separator:      " - ",
-		PagePrefix:     "",
-		BlankPageText:  "",
+		Language:       systemLanguage,
+		// Use language-specific texts
+		ChapterPrefix:   texts.ChapterPrefix,
+		RunningHeader:   texts.RunningHeader,
+		PagePrefix:      texts.PageNumber,
+		PageCountPrefix: DefaultPageCountPrefix,
+		BlankPageText:   texts.BlankPageText,
+		Separator:       DefaultSeparator,
+
+		PersonalTouch: false,
+		SetFields:     make(map[string]bool),
 	}
 }
 
@@ -92,80 +127,16 @@ func (c *MinionConfig) MergeWith(other *MinionConfig) error {
 		c.BlankPageText = other.BlankPageText
 	}
 
-	// Boolean flags always override
-	c.Verbose = other.Verbose
+	// Boolean flags are only merged if they have been explicitly set.
+	// See ADR-0009 on metadata.
+
+	// only merge Verbose value if it has been explicitly set in "other"
+	if c.SetFields["verbose"] {
+		c.Verbose = other.Verbose
+	}
 	c.Force = other.Force
 	c.Evenify = other.Evenify
 	c.Merge = other.Merge
 
 	return nil
-}
-
-// Validate validates the configuration for semantic correctness:
-// - Source directory must exist
-// - Target directory shall be empty if it exists (unless --force is set), otherwise it will be created
-// - a given language must be available in the provided languages
-// - and more
-func (c *MinionConfig) Validate() error {
-	// Validate source directory
-	if err := c.validateSourceDir(); err != nil {
-		return err
-	}
-
-	// Validate target directory
-	if err := c.validateTargetDir(); err != nil {
-		return err
-	}
-
-	// Validate language
-	if c.Language == language.Und {
-		return fmt.Errorf("invalid or undefined language")
-	}
-
-	return nil
-}
-
-func (c *MinionConfig) validateSourceDir() error {
-	if _, err := os.Stat(c.SourceDir); os.IsNotExist(err) {
-		return fmt.Errorf("source directory %q does not exist", c.SourceDir)
-	}
-	return nil
-}
-
-func (c *MinionConfig) validateTargetDir() error {
-	if _, err := os.Stat(c.TargetDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(c.TargetDir, os.ModePerm); err != nil {
-			return fmt.Errorf("failed to create target directory %q: %w", c.TargetDir, err)
-		}
-		return nil
-	}
-
-	if !c.Force {
-		empty, err := isDirEmpty(c.TargetDir)
-		if err != nil {
-			return err
-		}
-		if !empty {
-			return fmt.Errorf("target directory %q is not empty (use --force to override)", c.TargetDir)
-		}
-	}
-
-	return nil
-}
-
-func isDirEmpty(dir string) (bool, error) {
-	f, err := os.Open(dir)
-	if err != nil {
-		return false, err
-	}
-	defer f.Close()
-
-	// Try to read one entry
-	names, err := f.Readdirnames(1)
-	if err != nil && err != io.EOF {
-		return false, err // Return error if it's not EOF
-	}
-
-	// Directory is empty if we got EOF (no entries)
-	return len(names) == 0, nil
 }

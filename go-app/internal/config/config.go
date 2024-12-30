@@ -1,11 +1,10 @@
 package config
 
 import (
-	"fmt"
+	"golang.org/x/text/language"
 	"os"
 	"path/filepath"
 
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	"pdfminion/internal/domain"
@@ -19,128 +18,195 @@ var (
 	minionConfig       *domain.MinionConfig
 )
 
-// LoadConfig initializes and returns the parsed configuration
+// LoadConfig collects configuration from all sources and merges them
+// Priority order:
+// 1. (lowest priority) default,  depending on system language,
+// 2. home directory config file (if exists):
+// .   2a: $HOME/pdfminion.yaml if no --config filename is given
+// .   2b: $HOME/<filename>.yaml if --config filename is given
+// 3. local directory config file (if exists),
+// 4. (highest priority) command line flags
+//
+// In steps 2-4 we need to consider "unset" boolean values: If a boolean value is not set in the
+// configuration (file or flag), it must not override the previously set value.
+// Therefore we introduced metadata ("SetFields") to MinionConfig.
 func LoadConfig() (*domain.MinionConfig, error) {
-	log.Debug().Msg("Starting configuration")
 
-	defaultConfig = domain.NewDefaultConfig()
+	log.Debug().Msg("starting LoadConfig")
+
+	// 0. Start with system language detection
+	systemLang := domain.DetectSystemLanguage()
+
+	log.Debug().Str("language", systemLang.String()).Msg("detected")
 
 	// Parse individual configuration sources
-	if err := loadDefaultConfig(); err != nil {
-		return nil, fmt.Errorf("failed to load default configuration: %w", err)
-	}
-	if err := loadHomeDirFileConfig(); err != nil {
-		log.Warn().Err(err).Msg("Failed to load home directory configuration")
-	}
-	if err := loadLocalDirFileConfig(); err != nil {
-		log.Warn().Err(err).Msg("Failed to load local directory configuration")
-	}
-	if err := loadFlagConfig(); err != nil {
-		return nil, fmt.Errorf("failed to load flag configuration: %w", err)
-	}
+	// --------------------------------------
+
+	// 1. Start with language-dependent default configuration
+	minionConfig := loadDefaultConfig()
+
+	// 2. $HOME directory configuration file
+	/*	if homeDirFileConfig, err := loadHomeConfig(); err != nil {
+			log.Warn().Err(err).Msg("Failed to load home directory configuration")
+		}
+	*/
+	/*	// 3. Local directory configuration file
+		if localDirFileConfig, err := localDirFileConfig(); err != nil {
+			log.Warn().Err(err).Msg("Failed to load local directory configuration")
+		}
+	*/
+	// 4. Command line flags (with the exception of --language)
+	flagConfig := loadFlagConfig()
 
 	// Merge configurations in priority order
-	minionConfig = domain.NewDefaultConfig()
-	minionConfig.MergeWith(defaultConfig)
-	minionConfig.MergeWith(homeDirFileConfig)
-	minionConfig.MergeWith(localDirFileConfig)
-	minionConfig.MergeWith(flagConfig)
+
+	//minionConfig.MergeWith(homeDirFileConfig)
+	//minionConfig.MergeWith(localDirFileConfig)
+	err := minionConfig.MergeWith(flagConfig)
+	if err != nil {
+		log.Debug().Err(err).Msg("Failed to merge flag configuration")
+	}
 
 	return minionConfig, nil
 }
 
-// ValidateConfig checks the configuration for correctness
-func ValidateConfig(config *domain.MinionConfig) error {
-	return config.Validate()
-}
-
-func loadDefaultConfig() error {
+func loadDefaultConfig() *domain.MinionConfig {
 	log.Debug().Msg("loading default configuration")
 
-	defaultConfig = domain.NewDefaultConfig()
-	return nil
+	// Detect system language
+	systemLang := domain.DetectSystemLanguage()
+
+	// Check if detected language is supported
+	tag, _, _ := domain.GetMatcher().Match(systemLang)
+	if tag != systemLang {
+		log.Debug().
+			Str("detected", systemLang.String()).
+			Msg(" language not supported, falling back to English")
+		systemLang = language.English
+	}
+
+	return domain.NewDefaultConfig(systemLang)
 }
 
-func loadHomeDirFileConfig() error {
+func loadHomeConfig(filename string) (*domain.MinionConfig, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	configFile := viper.GetString("config")
-	if configFile == "" {
-		configFile = domain.MinionConfigFileName
-	}
-
-	homeConfigPath := filepath.Join(homeDir, configFile)
-	if _, err := os.Stat(homeConfigPath); os.IsNotExist(err) {
-		homeDirFileConfig = nil
-		return nil
-	}
-
-	viper.SetConfigFile(homeConfigPath)
+	viper.SetConfigFile(filepath.Join(homeDir, filename))
 	if err := viper.MergeInConfig(); err != nil {
-		return err
+		return nil, err
 	}
 
-	homeDirFileConfig = &domain.MinionConfig{}
-	if err := viper.Unmarshal(homeDirFileConfig); err != nil {
-		return err
+	var config domain.MinionConfig
+	if err := viper.Unmarshal(&config); err != nil {
+		return nil, err
 	}
 
-	return nil
+	return &config, nil
 }
 
-func loadLocalDirFileConfig() error {
-	configFile := viper.GetString("config")
-	if configFile == "" {
-		configFile = domain.MinionConfigFileName
-	}
-
-	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		localDirFileConfig = nil
-		return nil
-	}
-
-	viper.SetConfigFile(configFile)
+func loadLocalConfig(filename string) (*domain.MinionConfig, error) {
+	viper.SetConfigFile(filename)
 	if err := viper.MergeInConfig(); err != nil {
-		return err
+		return nil, err
 	}
 
-	localDirFileConfig = &domain.MinionConfig{}
-	if err := viper.Unmarshal(localDirFileConfig); err != nil {
-		return err
+	var config domain.MinionConfig
+	if err := viper.Unmarshal(&config); err != nil {
+		return nil, err
 	}
 
-	return nil
+	return &config, nil
 }
 
-func loadFlagConfig() error {
-	flagConfig = &domain.MinionConfig{
-		Verbose:       viper.GetBool("verbose"),
-		SourceDir:     viper.GetString("source"),
-		TargetDir:     viper.GetString("target"),
-		Force:         viper.GetBool("force"),
-		Evenify:       viper.GetBool("evenify"),
-		Merge:         viper.GetBool("merge"),
-		MergeFileName: viper.GetString("merge-filename"),
-		RunningHeader: viper.GetString("running-header"),
-		ChapterPrefix: viper.GetString("chapter-prefix"),
-		PagePrefix:    viper.GetString("page-prefix"),
+// loadFlagConfig loads the configuration from command line flags
+func loadFlagConfig() *domain.MinionConfig {
+	log.Debug().Msg("loading flag configuration")
+
+	// initialize local fconfig with empty metadata SetFields
+	fconfig := domain.MinionConfig{
+		SetFields: make(map[string]bool),
 	}
 
-	if langStr := viper.GetString("language"); langStr != "" {
-		lang, err := domain.ValidateLanguage(langStr)
-		if err != nil {
-			return fmt.Errorf("invalid language specified: %w", err)
-		}
-		flagConfig.Language = lang
+	if flagHasBeenProvided("verbose") {
+		fconfig.Verbose = viper.GetBool("verbose")
+		fconfig.SetFields["Verbose"] = true
+	}
+	if flagHasBeenProvided("source") {
+		fconfig.SourceDir = viper.GetString("source")
+		fconfig.SetFields["SourceDir"] = true
+	}
+	if flagHasBeenProvided("target") {
+		fconfig.TargetDir = viper.GetString("target")
+		fconfig.SetFields["TargetDir"] = true
+	}
+	if flagHasBeenProvided("force") {
+		fconfig.Force = viper.GetBool("force")
+		fconfig.SetFields["Force"] = true
+	}
+	if flagHasBeenProvided("evenify") {
+		fconfig.Evenify = viper.GetBool("evenify")
+		fconfig.SetFields["Evenify"] = true
+	}
+	if flagHasBeenProvided("merge") {
+		fconfig.Merge = true
+		fconfig.MergeFileName = viper.GetString("merge")
+		fconfig.SetFields["Merge"] = true
+	}
+	if flagHasBeenProvided("config") {
+		fconfig.ConfigFileName = viper.GetString("config")
+		fconfig.SetFields["ConfigFileName"] = true
+	}
+	if flagHasBeenProvided("language") {
+		fconfig.Language = domain.ParseLanguageCode(viper.GetString("language"))
+		fconfig.SetFields["Language"] = true
+	}
+	if flagHasBeenProvided("running-header") {
+		fconfig.RunningHeader = viper.GetString("running-header")
+		fconfig.SetFields["RunningHeader"] = true
+	}
+	if flagHasBeenProvided("chapter-prefix") {
+		fconfig.ChapterPrefix = viper.GetString("chapter-prefix")
+		fconfig.SetFields["ChapterPrefix"] = true
+	}
+	if flagHasBeenProvided("separator") {
+		fconfig.Separator = viper.GetString("separator")
+		fconfig.SetFields["Separator"] = true
+	}
+	if flagHasBeenProvided("page-prefix") {
+		fconfig.PagePrefix = viper.GetString("page-prefix")
+		fconfig.SetFields["PagePrefix"] = true
+	}
+	if flagHasBeenProvided("page-count-prefix") {
+		fconfig.PageCountPrefix = viper.GetString("page-count-prefix")
+		fconfig.SetFields["PageCountPrefix"] = true
+	}
+	if flagHasBeenProvided("blank-page-text") {
+		fconfig.BlankPageText = viper.GetString("blank-page-text")
+		fconfig.SetFields["BlankPageText"] = true
+	}
+	if flagHasBeenProvided("personal") {
+		fconfig.PersonalTouch = viper.GetBool("personal")
+		fconfig.SetFields["Personal"] = true
 	}
 
-	return nil
+	return &fconfig
+
 }
 
-func setupLogging(verbose bool) {
+// flagHasBeenProvided checks if a flag has been explicitly provided on the command line
+func flagHasBeenProvided(flagName string) bool {
+	flag := rootCmd.Flags().Lookup(flagName)
+	if flag == nil {
+		log.Warn().Msgf("Flag %s not found", flagName)
+		return false
+	}
+	return flag.Changed
+}
+
+/*func setupLogging(verbose bool) {
 	level := zerolog.InfoLevel
 	if verbose {
 		level = zerolog.DebugLevel
@@ -151,3 +217,4 @@ func setupLogging(verbose bool) {
 		TimeFormat: "15:04:05",
 	}).Level(level).With().Timestamp().Logger()
 }
+*/

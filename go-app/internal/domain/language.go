@@ -1,12 +1,11 @@
 package domain
 
 import (
+	"fmt"
 	"github.com/Xuanwo/go-locale"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
 	"golang.org/x/text/language/display"
-	"os"
-	"strings"
 )
 
 var (
@@ -50,41 +49,26 @@ var (
 	}
 )
 
+// GetMatcher returns the language matcher for supported languages
+func GetMatcher() language.Matcher {
+	return matcher
+}
+
 // DetectSystemLanguage detects the system language
 func DetectSystemLanguage() language.Tag {
-	// Check environment variables first
-	for _, envVar := range []string{"LANG", "LC_ALL", "LC_MESSAGES"} {
-		if tag := getLanguageFromEnv(envVar); tag != language.Und {
-			return tag
-		}
-	}
-
-	// Fallback to go-locale
+	log.Debug().Msg("Detecting system language")
 	tag, err := locale.Detect()
 	if err == nil {
 		tag, _, _ = matcher.Match(tag)
 		if base, conf := tag.Base(); conf != language.No {
+			log.Debug().Str("language", base.String()).Msg("detected")
 			return language.Make(base.String())
 		}
 	}
 
 	// Default to English if all else fails
+	log.Debug().Msg("Failed detecting system language, falling back to English")
 	return language.English
-}
-
-// getLanguageFromEnv attempts to extract a language tag from an environment variable
-func getLanguageFromEnv(envVar string) language.Tag {
-	if sysLocale := os.Getenv(envVar); sysLocale != "" {
-		// Strip charset if present (e.g., "en_US.UTF-8" -> "en_US")
-		langPart := strings.Split(sysLocale, ".")[0]
-		if tag, err := language.Parse(langPart); err == nil {
-			tag, _, _ = matcher.Match(tag)
-			if base, conf := tag.Base(); conf != language.No {
-				return language.Make(base.String())
-			}
-		}
-	}
-	return language.Und
 }
 
 // ValidateLanguage checks if a language string is valid and supported
@@ -107,6 +91,30 @@ func GetLanguageName(tag language.Tag) (code, nameInOriginal, nameInEnglish stri
 	return
 }
 
+// ParseLanguageCode takes a language string (e.g., "en", "en-US", "de-DE")
+// and returns the corresponding base language Tag.
+// Returns English tag if the input is invalid or unsupported.
+func ParseLanguageCode(langStr string) language.Tag {
+	if langStr == "" {
+		return language.English
+	}
+
+	parsedLang, err := ValidateLanguage(langStr)
+	if err != nil {
+		log.Debug().Str("input", langStr).Msg("Invalid language code, falling back to English")
+		return language.English
+	}
+
+	// Extract base language (e.g., "en" from "en-US")
+	baseLang, conf := parsedLang.Base()
+	if conf == language.No {
+		log.Debug().Str("input", langStr).Msg("Could not determine base language, falling back to English")
+		return language.English
+	}
+
+	return language.Make(baseLang.String())
+}
+
 // ListAvailableLanguages returns a list of supported languages with their codes and names
 func ListAvailableLanguages() [][]string {
 	var languages [][]string
@@ -122,18 +130,12 @@ func PrintLanguages() {
 	currentLanguage := DetectSystemLanguage()
 	currentCode, currentNameInOriginal, currentNameInEnglish := GetLanguageName(currentLanguage)
 
-	log.Info().Msg("Supported Languages:")
+	fmt.Println("Supported Languages:")
 	for _, lang := range ListAvailableLanguages() {
-		log.Info().
-			Str("code", lang[0]).
-			Str("name", lang[1]).
-			Str("english_name", lang[2]).
-			Msg("Language")
+		fmt.Printf("Code %s (%s, %s)\n",
+			lang[0], lang[1], lang[2])
 	}
 
-	log.Info().
-		Str("code", currentCode).
-		Str("native_name", currentNameInOriginal).
-		Str("english_name", currentNameInEnglish).
-		Msg("Current system language")
+	fmt.Printf("Current system language: %s (%s, %s)\n",
+		currentCode, currentNameInOriginal, currentNameInEnglish)
 }
