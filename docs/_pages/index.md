@@ -205,13 +205,13 @@ readability, and prominence, aligning with classic book design practices.
 
 | **Name**  | **Long Name**  | **Shorthand** | **Description** |
 |-----------|-------------------|-------------------|-----------------|
-| **Help**          | `help`      | `h`, `?`| Displays a list of supported commands and their usage.<br>Example: `pdfminion --help`|
-| **List Languages**| `list-languages` | `ll`   | Lists all available languages for the `--language` option.<br>Example: `pdfminion list-languages` |
+| **Help**          | `help`      | `?`| Displays a list of supported commands and their usage.<br>Example: `pdfminion --help`|
+| **List Languages**| `list-languages` | `ll`, `list`   | Lists available languages for the `--language` option.<br>Example: `pdfminion list-languages` |
 | **Settings**      | `settings`  |         | Prints all current settings, like page-prefix, chapter-prefix etc. <br>Example: `pdfminion settings` |
-| **Version**       | `version`   | `v`    | Displays the current version of PDFminion.<br>Example: `pdfminion version` |
+| **Version**       | `version`   |     | Displays the current version of PDFminion.<br>Example: `pdfminion version` |
 | **Credits**       | `credits`   |         | Gives credit to the maintainers of several OS libraries. <br>Example: `pdfminion credits`  |
 
-If no command is given, normal PDF processing is started, and all flags are evaluated.
+If no command is given, all flags are evaluate, validated and PDF processing is started.
 
 <h2>Basic Settings</h2>
 
@@ -223,7 +223,6 @@ If no command is given, normal PDF processing is started, and all flags are eval
 | **Config File**  | `--config <filename>`  | `-c <filename>` | Loads configuration from a file. It needs to be a yaml file. Example: `pdfminion --config settings.yaml`  |
 | **Verbose Mode**    | `--verbose`     |                | Gives detailed processing output. Example: `pdfminion --verbose` |
 
-See the [example config](#exampleconfig) for an extensive sample.
 
 <h2>Page Related Settings</h2>
 
