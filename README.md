@@ -19,6 +19,17 @@ Helper (_minion_) for some mundane tasks with PDF documents, among others:
 [![Maintainability](https://api.codeclimate.com/v1/badges/c481ef8142826f71ff65/maintainability)](https://codeclimate.com/github/gernotstarke/PDFminion/maintainability)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+#### new badges
+
+[![GoDoc](https://godoc.org/github.com/gernotstarke/PDFminion?status.svg)](https://godoc.org/github.com/gernotstarke/PDFminion)
+[![License](https://img.shields.io/github/license/gernotstarke/PDFminion.svg)](https://github.com/gernotstarke/PDFminion/blob/main/LICENSE)
+[![Go CI](https://github.com/gernotstarke/PDFminion/workflows/Go%20CI/badge.svg)](https://github.com/gernotstarke/PDFminion/actions)
+[![codecov](https://codecov.io/gh/gernotstarke/PDFminion/branch/main/graph/badge.svg)](https://codecov.io/gh/gernotstarke/PDFminion)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgernotstarke%2FPDFminion.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgernotstarke%2FPDFminion)
+
+# PDFminion
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=gernotstarke_PDFminion&metric=alert_status)](https://sonarcloud.io/dashboard?id=gernotstarke_PDFminion)
 
 ## Why PDFminion?
 
