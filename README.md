@@ -19,6 +19,12 @@ Helper (_minion_) for some mundane tasks with PDF documents, among others:
 [![Go CI](https://github.com/arc42/PDFminion/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/arc42/PDFminion/actions/golangci-lint.yml)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Farc42%2FPDFminion.svg?type=shield&issueType=security)](https://app.fossa.com/projects/git%2Bgithub.com%2Farc42%2FPDFminion?ref=badge_shield&issueType=security)
 
+### Experimental Badges
+[![Go Tests](https://github.com/gernotstarke/PDFminion/actions/workflows/go-test.yml/badge.svg)](https://github.com/gernotstarke/PDFminion/actions/workflows/go-test.yml)
+
+
+[![Test Count](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/gernotstarke/YOUR_GIST_ID/raw/pdfminion-test-count.json)](https://github.com/gernotstarke/PDFminion/actions/workflows/go-test.yml)
+
 ## Features
 
 When creating multiple PDF documents, you often need to add page numbers, headers, footers, or combine multiple PDF files into a single file.

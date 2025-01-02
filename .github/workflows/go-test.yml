@@ -1,0 +1,48 @@
+name: Go Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Run Tests and Count
+        run: |
+          cd go-app
+          # Run tests and store the pass/fail status
+          go test -v ./... 2>&1 | tee test_output.txt
+          TEST_COUNT=$(grep -c "^=== RUN" test_output.txt)
+          echo "TEST_COUNT=$TEST_COUNT" >> $GITHUB_ENV
+
+      - name: Test Coverage
+        run: |
+          cd go-app
+          go test -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./go-app/coverage.out
+
+      - name: Create Test Count Badge
+        uses: schneegans/dynamic-badges-action@v1.6.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: ${{ secrets.DYNA_GIST_ID }}
+          filename: pdfminion-test-count.json
+          label: tests
+          message: ${{ env.TEST_COUNT }} passed
+          color: green
