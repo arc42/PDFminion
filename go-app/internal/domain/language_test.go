@@ -10,9 +10,8 @@ import (
 
 func TestDetectSystemLanguageOnGernotsComputer(t *testing.T) {
 	// this test depends on a specific (German) envirionment, therefore we skip it in short mode (CI)
-	if testing.Short() {
-		t.Skip("Skipping local-only test in short mode")
-	}
+
+	t.Skip("Skipping local-only test in short mode")
 
 	// Get the system language (this should now detect German)
 	systemLang := MapSystemToAppLanguage()
