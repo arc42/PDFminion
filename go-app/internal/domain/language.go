@@ -19,32 +19,32 @@ var (
 
 	// DefaultTexts holds localized UI texts
 	DefaultTexts = map[language.Tag]struct {
-		ChapterPrefix string
-		RunningHeader string
-		PageFooter    string
-		PageNumber    string
-		BlankPageText string
+		RunningHeader   string
+		ChapterPrefix   string
+		PageCountPrefix string
+		PageNumber      string
+		BlankPageText   string
 	}{
 		language.German: {
-			ChapterPrefix: "Kapitel",
-			RunningHeader: "Seite",
-			PageFooter:    "Seite %d von %d",
-			PageNumber:    "Seite %d",
-			BlankPageText: "Diese Seite bleibt absichtlich leer",
+			RunningHeader:   "",
+			ChapterPrefix:   "Kapitel",
+			PageCountPrefix: "von",
+			PageNumber:      "Seite",
+			BlankPageText:   "Diese Seite bleibt absichtlich leer",
 		},
 		language.English: {
-			ChapterPrefix: "Chapter",
-			RunningHeader: "Page",
-			PageFooter:    "Page %d of %d",
-			PageNumber:    "Page %d",
-			BlankPageText: "deliberately left blank",
+			RunningHeader:   "",
+			ChapterPrefix:   DefaultChapterPrefix,
+			PageCountPrefix: "of",
+			PageNumber:      DefaultPageNrPrefix,
+			BlankPageText:   DefaultBlankPageText,
 		},
 		language.French: {
-			ChapterPrefix: "Chapitre",
-			RunningHeader: "Page",
-			PageFooter:    "Page %d sur %d",
-			PageNumber:    "Page %d",
-			BlankPageText: "Cette page est intentionnellement laissée vide",
+			RunningHeader:   "",
+			ChapterPrefix:   "Chapitre",
+			PageCountPrefix: "sur",
+			PageNumber:      "Page",
+			BlankPageText:   "Cette page est intentionnellement laissée vide",
 		},
 	}
 )

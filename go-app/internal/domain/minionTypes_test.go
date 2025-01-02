@@ -6,6 +6,49 @@ import (
 	"testing"
 )
 
+func TestDefaultConfigIsEnglish(t *testing.T) {
+	// Setup a default config
+	base := NewDefaultConfig(language.English)
+
+	// the language specific values should be set to the English values
+	assert.Equal(t, DefaultPageNrPrefix, base.PagePrefix)
+	assert.Equal(t, DefaultChapterPrefix, base.ChapterPrefix)
+	assert.Equal(t, DefaultPageCountPrefix, base.PageCountPrefix)
+	assert.Equal(t, DefaultBlankPageText, base.BlankPageText)
+}
+
+func TestDefaultConfigLanguageGerman(t *testing.T) {
+	// Setup a default config
+	base := NewDefaultConfig(language.German)
+
+	// the language specific values should be set to the German values
+	assert.Equal(t, DefaultTexts[language.German].PageNumber, base.PagePrefix)
+	assert.Equal(t, DefaultTexts[language.German].ChapterPrefix, base.ChapterPrefix)
+	assert.Equal(t, DefaultTexts[language.German].PageCountPrefix, base.PageCountPrefix)
+	assert.Equal(t, DefaultTexts[language.German].BlankPageText, base.BlankPageText)
+}
+
+func TestDefaultConfigLanguageFrench(t *testing.T) {
+	// Setup a default config
+	base := NewDefaultConfig(language.French)
+
+	assert.Equal(t, DefaultTexts[language.French].PageNumber, base.PagePrefix)
+	assert.Equal(t, DefaultTexts[language.French].ChapterPrefix, base.ChapterPrefix)
+	assert.Equal(t, DefaultTexts[language.French].PageCountPrefix, base.PageCountPrefix)
+	assert.Equal(t, DefaultTexts[language.French].BlankPageText, base.BlankPageText)
+}
+
+func TestDefaultConfigLanguageUnknown(t *testing.T) {
+	// Setup a default config with an unknown language "Zulu"
+	base := NewDefaultConfig(language.Zulu)
+
+	// the language specific values should be set to the English values
+	assert.Equal(t, DefaultTexts[language.English].PageNumber, base.PagePrefix)
+	assert.Equal(t, DefaultTexts[language.English].ChapterPrefix, base.ChapterPrefix)
+	assert.Equal(t, DefaultTexts[language.English].PageCountPrefix, base.PageCountPrefix)
+	assert.Equal(t, DefaultTexts[language.English].BlankPageText, base.BlankPageText)
+}
+
 func TestMinionConfig_MergeWithMinimal(t *testing.T) {
 	minimalBaseConfig := &MinionConfig{SourceDir: "/original/source"}
 	other := &MinionConfig{
@@ -116,5 +159,22 @@ func TestMinionConfig_MergeWithSubset(t *testing.T) {
 
 	assert.Equal(t, true, base.Verbose, "Verbose should have been overwritten and set to true")
 	assert.Equal(t, "/new/source", base.SourceDir, "SourceDir should have been overwritten and set to /new/source")
+
+}
+
+// TestMinionConfig_MergeWithSubset: A few fields are overwritten in the other config,
+func TestMinionConfig_MergeWithKnownOtherLanguage(t *testing.T) {
+	// Setup base config
+	base := NewDefaultConfig(language.English)
+
+	// Setup config to merge with
+	other := &MinionConfig{
+		SetFields: map[string]bool{
+			"language": true,
+			"verbose":  true,
+		},
+	}
+
+	assert.NoError(t, base.MergeWith(other), "MergeWith should not return an error")
 
 }

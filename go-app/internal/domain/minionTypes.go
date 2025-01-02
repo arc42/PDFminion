@@ -8,6 +8,7 @@ import (
 const (
 	MinionConfigFileName = "pdfminion.yaml"
 
+	DefaultRunningHeader   = "" // empty
 	DefaultSourceDir       = "_pdfs"
 	DefaultTargetDir       = "_target"
 	DefaultPageNrPrefix    = "Page"
@@ -88,7 +89,7 @@ func NewDefaultConfig(systemLanguage language.Tag) *MinionConfig {
 		ChapterPrefix:   texts.ChapterPrefix,
 		RunningHeader:   texts.RunningHeader,
 		PagePrefix:      texts.PageNumber,
-		PageCountPrefix: DefaultPageCountPrefix,
+		PageCountPrefix: texts.PageCountPrefix,
 		BlankPageText:   texts.BlankPageText,
 		Separator:       DefaultSeparator,
 
