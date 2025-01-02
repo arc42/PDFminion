@@ -14,6 +14,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check Secrets
+        run: |
+          if [ -z "${{ secrets.GIST_SECRET }}" ]; then
+            echo "Error: GIST_SECRET is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.DYNA_GIST_ID }}" ]; then
+            echo "Error: DYNA_GIST_ID is not set"
+            exit 1
+          fi
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -32,10 +43,15 @@ jobs:
           cd go-app
           go test -race -coverprofile=coverage.out -covermode=atomic ./...
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
         with:
-          files: ./go-app/coverage.out
+          name: test-results
+          path: |
+            go-app/test_output.txt
+            go-app/coverage.out
+      
 
       - name: Create Test Count Badge
         uses: schneegans/dynamic-badges-action@v1.6.0
