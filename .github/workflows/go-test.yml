@@ -16,7 +16,7 @@ jobs:
 
       - name: Check Secrets
         run: |
-          if [ -z "${{ secrets.GIST_SECRET }}" ]; then
+          if [ -z "${{ secrets.DYNAMIC_GIST_ACTION }}" ]; then
             echo "Error: GIST_SECRET is not set"
             exit 1
           fi
@@ -56,7 +56,7 @@ jobs:
       - name: Create Test Count Badge
         uses: schneegans/dynamic-badges-action@v1.6.0
         with:
-          auth: ${{ secrets.GIST_SECRET }}
+          auth: ${{ secrets.DYNAMIC_GIST_ACTION }}
           gistID: ${{ secrets.DYNA_GIST_ID }}
           filename: minion-testresults.json
           label: tests
