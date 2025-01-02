@@ -24,8 +24,8 @@ Helper (_minion_) for some mundane tasks with PDF documents, among others:
 
 ### Experimental Badges
 
-![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/yourusername/6cea11743115436277c8c04f500f4af8/raw/minion-testresults.json)
-![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/yourusername/6cea11743115436277c8c04f500f4af8/raw/minion-coverage.json)
+![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/gernotstarke/6cea11743115436277c8c04f500f4af8/raw/minion-testresults.json)
+![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/gernotstarke/6cea11743115436277c8c04f500f4af8/raw/minion-coverage.json)
 
 ## Features
 
