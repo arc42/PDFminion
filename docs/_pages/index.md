@@ -338,6 +338,8 @@ PDFminion uses numerous open-source libraries, and wish to thank the maintainers
 * [Steve Francia](https://spf13.com) for a lot of stuff, including [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper), the command-line and configuration libraries.
 * [Max Howell](https://brew.sh) for creating Homebrew, the package manager for MacOS.
 * [Tom Preston-Werner & Co.](https://jekyllrb.com) for creating Jekyll, the static site generator.
+* [Simon Schneegans](https://schneegans.github.io/tutorials/2022/04/18/badges) for the dynamic badge action.
+* [INNOQ](https://www.innoq.com) for generous support of the arc42 open source initiative.
 * and, of course, the [Go team](https://golang.org/) for creating the language that compiles to various operating systems, and refrains from adding fancy features every 6 month (pun intended).
 </section>
 
