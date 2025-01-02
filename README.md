@@ -19,13 +19,14 @@ Helper (_minion_) for some mundane tasks with PDF documents, among others:
 [![Go CI](https://github.com/arc42/PDFminion/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/arc42/PDFminion/actions/golangci-lint.yml)
 [![Test Count](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/gernotstarke/6cea11743115436277c8c04f500f4af8/raw/minion-testresults.json)](https://github.com/arc42/PDFminion/actions/workflows/go-test.yml)
 [![Test Status](https://github.com/arc42/PDFminion/actions/workflows/go-test.yml/badge.svg)](https://github.com/arc42/PDFminion/actions/workflows/go-test.yml)
+![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/gernotstarke/6cea11743115436277c8c04f500f4af8/raw/minion-coverage.json)
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Farc42%2FPDFminion.svg?type=shield&issueType=security)](https://app.fossa.com/projects/git%2Bgithub.com%2Farc42%2FPDFminion?ref=badge_shield&issueType=security)
 
-### Experimental Badges
+### Explanation
 
-![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/gernotstarke/6cea11743115436277c8c04f500f4af8/raw/minion-testresults.json)
-![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/gernotstarke/6cea11743115436277c8c04f500f4af8/raw/minion-coverage.json)
+The low test coverage stems from the fact that a lot of functionality can only be realistically tested by manually inspecting the generated PDF files.
+
 
 ## Features
 
