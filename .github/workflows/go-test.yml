@@ -42,7 +42,7 @@ jobs:
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: ${{ secrets.DYNA_GIST_ID }}
-          filename: pdfminion-test-count.json
+          filename: minion-testresults.json
           label: tests
           message: ${{ env.TEST_COUNT }} passed
           color: green
