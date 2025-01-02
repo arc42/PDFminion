@@ -5,11 +5,10 @@ import (
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
+	"github.com/rs/zerolog/log"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
-	"pdfminion/internal/domain"
 	"pdfminion/internal/util"
 	"strconv"
 )
@@ -30,19 +29,22 @@ func InitializePDFInternals() {
 	relaxedConf.ValidationMode = model.ValidationRelaxed
 }
 
-func CollectCandidatePDFs(cfg *domain.MinionConfig) ([]string, error) {
-	// count PDFs in source directory
-	// abort if no PDF file is present
-
+// CollectCandidatePDFs collects all PDF files in the source directory
+// and aborts if no PDF files are present
+func CollectCandidatePDFs() ([]string, error) {
 	var nrOfCandidatePDFs int
 
-	files, err, nrOfCandidatePDFs := getNumberOfCandidatePDFs(cfg.SourceDir)
+	files, err, nrOfCandidatePDFs := getNumberOfCandidatePDFs(appConfig.SourceDir)
+	if appConfig.Verbose {
+		fmt.Printf("Found %d PDF files in %s\n", nrOfCandidatePDFs, appConfig.SourceDir)
+	}
 
 	// exit if no PDF files can be found
 	if nrOfCandidatePDFs == 0 {
-		fmt.Fprintf(os.Stderr, "error: no PDF files found in %s\n", cfg.SourceDir)
+		fmt.Printf("No PDF files found in %s\n", appConfig.SourceDir)
 		os.Exit(1)
 	}
+
 	return files, err
 }
 
@@ -52,7 +54,7 @@ func getNumberOfCandidatePDFs(sourceDir string) ([]string, error, int) {
 	pattern := filepath.Join(sourceDir, "*.pdf")
 	files, err := filepath.Glob(pattern)
 	if err != nil {
-		log.Println("Error:", err)
+		log.Error().Err(err).Msg("Error")
 	}
 
 	return files, err, len(files)
@@ -72,7 +74,7 @@ func ValidatePDFs(files []string) ([]SingleFileToProcess, int) {
 
 		pageCount, err := api.PageCountFile(file)
 		if err != nil {
-			log.Printf("error counting pages in %v\n", file)
+			log.Error().Err(err).Str("file: %v", file).Msg("Error counting pages")
 			continue
 		}
 
@@ -110,17 +112,32 @@ func CopyValidatedPDFs(validPDFs []SingleFileToProcess, sourceDir, targetDir str
 			}
 		}
 
+		// Open the source file
 		originalFile, err := os.Open(sourcePath)
 		if err != nil {
 			return fmt.Errorf("error opening source file %s: %w", sourcePath, err)
 		}
-		defer originalFile.Close()
 
+		// Ensure the source file is closed after use
+		defer func(file *os.File) {
+			if closeErr := file.Close(); closeErr != nil {
+				log.Printf("error closing source file %s: %v", sourcePath, closeErr)
+			}
+		}(originalFile)
+
+		// Create the target file
 		newFile, err := os.Create(targetPath)
 		if err != nil {
+			originalFile.Close() // Ensure source file is closed before returning
 			return fmt.Errorf("error creating target file %s: %w", targetPath, err)
 		}
-		defer newFile.Close()
+
+		// Ensure the target file is closed after use
+		defer func(file *os.File) {
+			if closeErr := file.Close(); closeErr != nil {
+				log.Printf("error closing target file %s: %v", targetPath, closeErr)
+			}
+		}(newFile)
 
 		bytesWritten, err := io.Copy(newFile, originalFile)
 		if err != nil {
@@ -144,8 +161,13 @@ func AddPageNumbersToAllFiles(nrOfValidPDFs int, pdfFiles []SingleFileToProcess)
 	for i := 0; i < nrOfValidPDFs; i++ {
 		var currentFilePageCount = pdfFiles[i].PageCount
 		var currentFileName = pdfFiles[i].Filename
-		log.Printf("File %s starts %d, ends %d", currentFileName, currentOffset+1,
-			currentOffset+currentFilePageCount)
+
+		log.Debug().Str("file", currentFileName).Int("start", currentOffset+1).Int("end", currentOffset+currentFilePageCount).Msg("Adding page numbers")
+
+		if appConfig.Verbose {
+			fmt.Printf("File %s starts %d, ends %d\n", currentFileName, currentOffset+1,
+				currentOffset+currentFilePageCount)
+		}
 
 		err := api.AddWatermarksMapFile(currentFileName,
 			"",
@@ -154,7 +176,7 @@ func AddPageNumbersToAllFiles(nrOfValidPDFs int, pdfFiles []SingleFileToProcess)
 				currentFilePageCount),
 			relaxedConf)
 		if err != nil {
-			log.Println(err)
+			log.Error().Err(err).Str("file", currentFileName).Msg("Error adding watermarks")
 		}
 		currentOffset += currentFilePageCount
 	}
@@ -167,10 +189,10 @@ func watermarkConfigurationForFile(chapterNr, previousPageNr, pageCount int) map
 
 	for page := 1; page <= (pageCount); page++ {
 		var currentPageNr = previousPageNr + page
-		var chapterStr = domain.ChapterPrefix + strconv.Itoa(chapterNr)
-		var pageStr = domain.PageNrPrefix + strconv.Itoa(currentPageNr)
+		var chapterStr = appConfig.ChapterPrefix + strconv.Itoa(chapterNr)
+		var pageStr = appConfig.PagePrefix + strconv.Itoa(currentPageNr)
 
-		wmcs[page], _ = api.TextWatermark(chapterStr+domain.ChapterPageSeparator+pageStr,
+		wmcs[page], _ = api.TextWatermark(chapterStr+appConfig.Separator+pageStr,
 			waterMarkDescription(currentPageNr), true, false, types.POINTS)
 	}
 	return wmcs

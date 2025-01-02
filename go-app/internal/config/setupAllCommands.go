@@ -1,7 +1,9 @@
 package config
 
 import (
+	"fmt"
 	"os"
+	"pdfminion/internal/pdf"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -187,6 +189,15 @@ func CreditsCmd() *cobra.Command {
 
 func runPDFProcessing(cmd *cobra.Command, args []string) error {
 	log.Info().Msg("Starting PDF processing")
-	// TODO: Implement actual PDF processing logic
+
+	// Validate configuration
+	if err := domain.ValidateConfig(minionConfig); err != nil {
+		return fmt.Errorf("invalid configuration: %w", err)
+	}
+
+	// Process PDFs
+	if err := pdf.ProcessPDFs(minionConfig); err != nil {
+		return fmt.Errorf("error processing PDFs: %w", err)
+	}
 	return nil
 }

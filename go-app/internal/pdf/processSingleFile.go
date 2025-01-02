@@ -1,15 +1,14 @@
 package pdf
 
 import (
+	"fmt"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
-	"log"
+	"github.com/rs/zerolog/log"
 	"pdfminion/internal/util"
 	"strconv"
 )
-
-const blankPageNote = "Diese Seite bleibt\n absichtlich frei"
 
 // TODO: Split Evenify function into loop-over-all-files and evenify-single-file
 
@@ -27,7 +26,7 @@ func Evenify(nrOfValidPDFs int, pdfFiles []SingleFileToProcess) {
 			onTop := true
 			update := false
 
-			wm, err := api.TextWatermark(blankPageNote, "font:Helvetica, points:48, col: 0.5 0.6 0.5, rot:45, sc:1 abs",
+			wm, err := api.TextWatermark(appConfig.BlankPageText, "font:Helvetica, points:48, col: 0.5 0.6 0.5, rot:45, sc:1 abs",
 				onTop, update, types.POINTS)
 			if err != nil {
 				log.Printf("Error creating watermark configuration %v: %v\n", wm, err)
@@ -41,7 +40,10 @@ func Evenify(nrOfValidPDFs int, pdfFiles []SingleFileToProcess) {
 				}
 
 			}
-			log.Printf("File %s was evenified\n", pdfFiles[i].Filename)
+			if appConfig.Verbose {
+				fmt.Printf("File %s was evenified\n", pdfFiles[i].Filename)
+			}
+			log.Debug().Str("File %s\n", pdfFiles[i].Filename).Msg("was evenified")
 		}
 	}
 }

@@ -1,0 +1,28 @@
+ @startuml
+
+component "configuration handling" as config
+package "domain" {
+   component "core types" as types
+   component "language support" as language
+   component "validation"
+}
+
+component "PDF processing" as pdf
+component "utility functions" as util
+
+component [main]
+
+component "<<ThirdParty>>\ncobra & viper" as cobra #85C1E9
+component "<<ThirdParty>>\npdfcpu" as pdfcpu #85C1E9
+}
+
+main -down-> config
+config -down-> types
+config -down-> language
+config -down-> pdf
+pdf -down-> types
+config -> validation
+pdf -down-> util
+pdfcpu <- pdf
+config -> cobra
+@enduml
