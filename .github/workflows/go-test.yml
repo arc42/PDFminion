@@ -38,10 +38,12 @@ jobs:
           TEST_COUNT=$(grep -c "^=== RUN" test_output.txt)
           echo "TEST_COUNT=$TEST_COUNT" >> $GITHUB_ENV
 
-      - name: Test Coverage
+      - name: Generate Coverage
         run: |
-          cd go-app
-          go test -race -coverprofile=coverage.out -covermode=atomic ./...
+            cd go-app
+            go test -race -coverprofile=coverage.out -covermode=atomic ./...
+            COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | tr -d '%')
+            echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
 
       - name: Upload test results
         if: always()
@@ -59,7 +61,18 @@ jobs:
           auth: ${{ secrets.DYNAMIC_GIST_ACTION }}
           gistID: ${{ secrets.DYNA_GIST_ID }}
           filename: minion-testresults.json
-          label: tests
+          label: Tests
           message: ${{ env.TEST_COUNT }} ${{ job.status == 'success' && 'passed' || 'failed' }}
           color: ${{ job.status == 'success' && 'green' || 'red' }}
+        if: always()
+        
+      - name: Create Coverage Badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.DYNAMIC_GIST_ACTION }}
+          gistID: ${{ secrets.DYNA_GIST_ID }}
+          filename: minion-coverage.json
+          label: Coverage
+          message: ${{ env.COVERAGE }}%
+          color: ${{ env.COVERAGE >= 80 && 'green' || env.COVERAGE >= 60 && 'yellow' || 'red' }}
         if: always()
