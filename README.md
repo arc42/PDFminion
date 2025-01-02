@@ -24,7 +24,7 @@ Helper (_minion_) for some mundane tasks with PDF documents, among others:
 ### Experimental Badges
 
 
-[![Test Count](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/gernotstarke/YOUR_GIST_ID/raw/pdfminion-test-count.json)](https://github.com/arc42/PDFminion/actions/workflows/go-test.yml)
+[![Test Count](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/gernotstarke/6cea11743115436277c8c04f500f4af8/raw/pdfminion-test-count.json)](https://github.com/arc42/PDFminion/actions/workflows/go-test.yml)
 
 ## Features
 
