@@ -5,7 +5,7 @@ Helper (_minion_) for some mundane tasks with PDF documents, among others:
 
 * add page numbers
 * add header and/or footer text
-* concatenate (combine multiple PDF files into a single file)
+* merge (concatenate, combine multiple PDF files into a single file)
 
 
 >  minion: a servile dependent, follower, or underling.<br> 
@@ -14,24 +14,22 @@ Helper (_minion_) for some mundane tasks with PDF documents, among others:
 
 ## Status
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/gernotstarke/pdfminion)](https://goreportcard.com/report/github.com/gernotstarke/pdfminion)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=gernotstarke_PDFminion&metric=alert_status)](https://sonarcloud.io/dashboard?id=gernotstarke_PDFminion)
-[![Maintainability](https://api.codeclimate.com/v1/badges/c481ef8142826f71ff65/maintainability)](https://codeclimate.com/github/gernotstarke/PDFminion/maintainability)
+[![Go Report Card](https://goreportcard.com/badge/github.com/arc42/pdfminion)](https://goreportcard.com/report/github.com/arc42/pdfminion)
+
+[![Maintainability](https://api.codeclimate.com/v1/badges/c481ef8142826f71ff65/maintainability)](https://codeclimate.com/github/arc42/PDFminion/maintainability
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 #### new badges
 
-[![GoDoc](https://godoc.org/github.com/gernotstarke/PDFminion?status.svg)](https://godoc.org/github.com/gernotstarke/PDFminion)
-[![License](https://img.shields.io/github/license/gernotstarke/PDFminion.svg)](https://github.com/gernotstarke/PDFminion/blob/main/LICENSE)
-[![Go CI](https://github.com/gernotstarke/PDFminion/workflows/Go%20CI/badge.svg)](https://github.com/gernotstarke/PDFminion/actions)
-[![codecov](https://codecov.io/gh/gernotstarke/PDFminion/branch/main/graph/badge.svg)](https://codecov.io/gh/gernotstarke/PDFminion)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgernotstarke%2FPDFminion.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgernotstarke%2FPDFminion)
+[![Go CI](https://github.com/arc42/PDFminion/workflows/Go%20CI/badge.svg)](https://github.com/arc42/PDFminion/actions)
 
-# PDFminion
+[![codecov](https://codecov.io/gh/arc42/PDFminion/branch/main/graph/badge.svg)](https://codecov.io/gh/arc42/PDFminion)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Farc42e%2FPDFminion.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Farc42%2FPDFminion)
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=gernotstarke_PDFminion&metric=alert_status)](https://sonarcloud.io/dashboard?id=gernotstarke_PDFminion)
-
-## Why PDFminion?
-
-When creating PDF documents, you often need to add page numbers, headers, footers, or combine multiple PDF files into a single file.
+When creating multiple PDF documents, you often need to add page numbers, headers, footers, or combine multiple PDF files into a single file.
 PDFminion can do that for you - from a terminal and the command line, on MacOS, Linux and Windows platforms.
+
+
+## Installation and usage
+
+See the [comprehensive website](https://pdfminion.arc42.org) for details on installation and usage.
