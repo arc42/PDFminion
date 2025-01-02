@@ -35,7 +35,7 @@ func LoadConfig() (*domain.MinionConfig, error) {
 	log.Debug().Msg("starting LoadConfig")
 
 	// 0. Start with system language detection
-	systemLang := domain.DetectSystemLanguage()
+	systemLang := domain.MapSystemToAppLanguage()
 
 	log.Debug().Str("language", systemLang.String()).Msg("detected")
 
@@ -74,7 +74,7 @@ func loadDefaultConfig() *domain.MinionConfig {
 	log.Debug().Msg("loading default configuration")
 
 	// Detect system language
-	systemLang := domain.DetectSystemLanguage()
+	systemLang := domain.MapSystemToAppLanguage()
 
 	// Check if detected language is supported
 	tag, _, _ := domain.GetMatcher().Match(systemLang)
@@ -132,64 +132,64 @@ func loadFlagConfig() *domain.MinionConfig {
 
 	if flagHasBeenProvided("verbose") {
 		fconfig.Verbose = viper.GetBool("verbose")
-		fconfig.SetFields["Verbose"] = true
+		fconfig.SetFields["verbose"] = true
 	}
 	if flagHasBeenProvided("source") {
 		fconfig.SourceDir = viper.GetString("source")
-		fconfig.SetFields["SourceDir"] = true
+		fconfig.SetFields["sourcedir"] = true
 	}
 	if flagHasBeenProvided("target") {
 		fconfig.TargetDir = viper.GetString("target")
-		fconfig.SetFields["TargetDir"] = true
+		fconfig.SetFields["targetdir"] = true
 	}
 	if flagHasBeenProvided("force") {
 		fconfig.Force = viper.GetBool("force")
-		fconfig.SetFields["Force"] = true
+		fconfig.SetFields["force"] = true
 	}
 	if flagHasBeenProvided("evenify") {
 		fconfig.Evenify = viper.GetBool("evenify")
-		fconfig.SetFields["Evenify"] = true
+		fconfig.SetFields["evenify"] = true
 	}
 	if flagHasBeenProvided("merge") {
 		fconfig.Merge = true
 		fconfig.MergeFileName = viper.GetString("merge")
-		fconfig.SetFields["Merge"] = true
+		fconfig.SetFields["merge"] = true
 	}
 	if flagHasBeenProvided("config") {
 		fconfig.ConfigFileName = viper.GetString("config")
-		fconfig.SetFields["ConfigFileName"] = true
+		fconfig.SetFields["configfilename"] = true
 	}
 	if flagHasBeenProvided("language") {
 		fconfig.Language = domain.ParseLanguageCode(viper.GetString("language"))
-		fconfig.SetFields["Language"] = true
+		fconfig.SetFields["language"] = true
 	}
 	if flagHasBeenProvided("running-header") {
 		fconfig.RunningHeader = viper.GetString("running-header")
-		fconfig.SetFields["RunningHeader"] = true
+		fconfig.SetFields["runningheader"] = true
 	}
 	if flagHasBeenProvided("chapter-prefix") {
 		fconfig.ChapterPrefix = viper.GetString("chapter-prefix")
-		fconfig.SetFields["ChapterPrefix"] = true
+		fconfig.SetFields["chapterprefix"] = true
 	}
 	if flagHasBeenProvided("separator") {
 		fconfig.Separator = viper.GetString("separator")
-		fconfig.SetFields["Separator"] = true
+		fconfig.SetFields["separator"] = true
 	}
 	if flagHasBeenProvided("page-prefix") {
 		fconfig.PagePrefix = viper.GetString("page-prefix")
-		fconfig.SetFields["PagePrefix"] = true
+		fconfig.SetFields["pageprefix"] = true
 	}
 	if flagHasBeenProvided("page-count-prefix") {
 		fconfig.PageCountPrefix = viper.GetString("page-count-prefix")
-		fconfig.SetFields["PageCountPrefix"] = true
+		fconfig.SetFields["pagecountprefix"] = true
 	}
 	if flagHasBeenProvided("blank-page-text") {
 		fconfig.BlankPageText = viper.GetString("blank-page-text")
-		fconfig.SetFields["BlankPageText"] = true
+		fconfig.SetFields["blankpagetext"] = true
 	}
 	if flagHasBeenProvided("personal") {
 		fconfig.PersonalTouch = viper.GetBool("personal")
-		fconfig.SetFields["Personal"] = true
+		fconfig.SetFields["personal"] = true
 	}
 
 	return &fconfig

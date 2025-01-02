@@ -54,14 +54,16 @@ func GetMatcher() language.Matcher {
 	return matcher
 }
 
-// DetectSystemLanguage detects the system language
-func DetectSystemLanguage() language.Tag {
-	log.Debug().Msg("Detecting system language")
+// MapSystemToAppLanguage detects the system language and maps to a supported language
+// if the detected language is not supported, English is returned!
+func MapSystemToAppLanguage() language.Tag {
 	tag, err := locale.Detect()
+	log.Debug().Str("found ", tag.String()).Msg("Detecting system language")
 	if err == nil {
+		// Check if detected language is supported
 		tag, _, _ = matcher.Match(tag)
 		if base, conf := tag.Base(); conf != language.No {
-			log.Debug().Str("language", base.String()).Msg("detected")
+			log.Debug().Str("language", base.String()).Msg("Mapped detected language to English")
 			return language.Make(base.String())
 		}
 	}
@@ -127,7 +129,7 @@ func ListAvailableLanguages() [][]string {
 
 // PrintLanguages displays the list of supported languages and the current system language
 func PrintLanguages() {
-	currentLanguage := DetectSystemLanguage()
+	currentLanguage := MapSystemToAppLanguage()
 	currentCode, currentNameInOriginal, currentNameInEnglish := GetLanguageName(currentLanguage)
 
 	fmt.Println("Supported Languages:")

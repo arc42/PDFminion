@@ -55,6 +55,8 @@ type MinionConfig struct {
 	PersonalTouch bool
 
 	// Metadata to track which fields were explicitly set
+	// This is used to determine which fields to merge
+	// Note: keys are lowercase, should be converted with strings.ToLower()
 	SetFields map[string]bool
 }
 
@@ -102,6 +104,9 @@ func (c *MinionConfig) MergeWith(other *MinionConfig) error {
 	}
 
 	// Only override non-zero values
+	if other.ConfigFileName != "" {
+		c.ConfigFileName = other.ConfigFileName
+	}
 	if other.Language != language.Und {
 		c.Language = other.Language
 	}
@@ -126,17 +131,29 @@ func (c *MinionConfig) MergeWith(other *MinionConfig) error {
 	if other.BlankPageText != "" {
 		c.BlankPageText = other.BlankPageText
 	}
+	if other.Separator != "" {
+		c.Separator = other.Separator
+	}
 
 	// Boolean flags are only merged if they have been explicitly set.
 	// See ADR-0009 on metadata.
 
 	// only merge Verbose value if it has been explicitly set in "other"
-	if c.SetFields["verbose"] {
+	if other.SetFields["verbose"] {
 		c.Verbose = other.Verbose
 	}
-	c.Force = other.Force
-	c.Evenify = other.Evenify
-	c.Merge = other.Merge
+	if other.SetFields["force"] {
+		c.Force = other.Force
+	}
+	if other.SetFields["evenify"] {
+		c.Evenify = other.Evenify
+	}
+	if other.SetFields["merge"] {
+		c.Merge = other.Merge
+	}
+	if other.SetFields["personal"] {
+		c.PersonalTouch = other.PersonalTouch
+	}
 
 	return nil
 }
