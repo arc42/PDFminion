@@ -101,7 +101,22 @@ func NewDefaultConfig(systemLanguage language.Tag) *MinionConfig {
 // MergeWith merges the current config with another config, giving precedence to the other config
 func (c *MinionConfig) MergeWith(other *MinionConfig) error {
 	if other == nil {
+		// don't change c if other is nil
 		return nil
+	}
+	// handle language separately:
+	// if other language is set, use it for all language-specific fields
+	// and set these fields to language-specific defaults.
+	if other.Language.String() != "" {
+		c.Language = other.Language
+		if IsLanguageSupported(other.Language) {
+			texts := DefaultTexts[other.Language]
+			c.ChapterPrefix = texts.ChapterPrefix
+			c.RunningHeader = texts.RunningHeader
+			c.PagePrefix = texts.PageNumber
+			c.PageCountPrefix = texts.PageCountPrefix
+			c.BlankPageText = texts.BlankPageText
+		}
 	}
 
 	// Only override non-zero values

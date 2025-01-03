@@ -49,6 +49,15 @@ var (
 	}
 )
 
+func IsLanguageSupported(tag language.Tag) bool {
+	for _, supportedTag := range supportedLanguages {
+		if tag == supportedTag {
+			return true
+		}
+	}
+	return false
+}
+
 // GetMatcher returns the language matcher for supported languages
 func GetMatcher() language.Matcher {
 	return matcher

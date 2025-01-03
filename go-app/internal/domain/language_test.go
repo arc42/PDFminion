@@ -108,6 +108,26 @@ func TestUnsupportedSystemLanguageFallback(t *testing.T) {
 	assert.Equal(t, expectedTexts.BlankPageText, config.BlankPageText, "Blank page text should be in English")
 }
 
+func TestIsLanguageSupported(t *testing.T) {
+	tests := []struct {
+		lang language.Tag
+		want bool
+	}{
+		{language.German, true},
+		{language.English, true},
+		{language.French, true},
+		{language.Icelandic, false},
+		{language.Zulu, false},
+	}
+
+	for _, tt := range tests {
+		got := IsLanguageSupported(tt.lang)
+		if got != tt.want {
+			t.Errorf("IsLanguageSupported(%v) = %v, want %v", tt.lang, got, tt.want)
+		}
+	}
+}
+
 func TestParseLanguageCode(t *testing.T) {
 	tests := []struct {
 		name     string

@@ -7,7 +7,6 @@ import (
 )
 
 func TestDefaultConfigIsEnglish(t *testing.T) {
-	// Setup a default config
 	base := NewDefaultConfig(language.English)
 
 	// the language specific values should be set to the English values
@@ -18,7 +17,6 @@ func TestDefaultConfigIsEnglish(t *testing.T) {
 }
 
 func TestDefaultConfigLanguageGerman(t *testing.T) {
-	// Setup a default config
 	base := NewDefaultConfig(language.German)
 
 	// the language specific values should be set to the German values
@@ -29,7 +27,6 @@ func TestDefaultConfigLanguageGerman(t *testing.T) {
 }
 
 func TestDefaultConfigLanguageFrench(t *testing.T) {
-	// Setup a default config
 	base := NewDefaultConfig(language.French)
 
 	assert.Equal(t, DefaultTexts[language.French].PageNumber, base.PagePrefix)
@@ -39,7 +36,7 @@ func TestDefaultConfigLanguageFrench(t *testing.T) {
 }
 
 func TestDefaultConfigLanguageUnknown(t *testing.T) {
-	// Setup a default config with an unknown language "Zulu"
+	// Set up a default config with an unknown language "Zulu"
 	base := NewDefaultConfig(language.Zulu)
 
 	// the language specific values should be set to the English values
@@ -49,11 +46,53 @@ func TestDefaultConfigLanguageUnknown(t *testing.T) {
 	assert.Equal(t, DefaultTexts[language.English].BlankPageText, base.BlankPageText)
 }
 
+// TestDefaultConfigMergeWithFlagEnglish merges an English default config with
+// --language German. The language specific values should be set to the German (default)
+func TestDefaultConfigMergeWithFlagGerman(t *testing.T) {
+	base := NewDefaultConfig(language.English)
+
+	german := &MinionConfig{
+		Language:  language.German,
+		SetFields: map[string]bool{"language": true},
+	}
+
+	// can merge without error
+	assert.NoError(t, base.MergeWith(german), "MergeWith should not return an error")
+
+	// the language specific values should be set to the German values
+	// the language specific values should be set to the German values
+	assert.Equal(t, DefaultTexts[language.German].PageNumber, base.PagePrefix)
+	assert.Equal(t, DefaultTexts[language.German].ChapterPrefix, base.ChapterPrefix)
+	assert.Equal(t, DefaultTexts[language.German].PageCountPrefix, base.PageCountPrefix)
+	assert.Equal(t, DefaultTexts[language.German].BlankPageText, base.BlankPageText)
+}
+
+// TestDefaultConfigMergeWithFlagEnglish merges an English default config with
+// --language French. The language specific values should be set to the German (default)
+func TestDefaultConfigMergeWithFlagFrench(t *testing.T) {
+	base := NewDefaultConfig(language.English)
+
+	french := &MinionConfig{
+		Language:  language.French,
+		SetFields: map[string]bool{"language": true},
+	}
+
+	// can merge without error
+	assert.NoError(t, base.MergeWith(french), "MergeWith should not return an error")
+
+	// the language specific values should be set to the German values
+	// the language specific values should be set to the German values
+	assert.Equal(t, DefaultTexts[language.French].PageNumber, base.PagePrefix)
+	assert.Equal(t, DefaultTexts[language.French].ChapterPrefix, base.ChapterPrefix)
+	assert.Equal(t, DefaultTexts[language.French].PageCountPrefix, base.PageCountPrefix)
+	assert.Equal(t, DefaultTexts[language.French].BlankPageText, base.BlankPageText)
+}
+
 func TestMinionConfig_MergeWithMinimal(t *testing.T) {
 	minimalBaseConfig := &MinionConfig{SourceDir: "/original/source"}
 	other := &MinionConfig{
 		SourceDir: "/new/source",
-		SetFields: map[string]bool{"Source": true},
+		SetFields: map[string]bool{"source": true},
 	}
 	assert.NoError(t, minimalBaseConfig.MergeWith(other), "MergeWith should not return an error")
 	assert.Equal(t, "/new/source", minimalBaseConfig.SourceDir)
