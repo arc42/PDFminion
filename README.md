@@ -23,6 +23,10 @@ Helper (_minion_) for some mundane tasks with PDF documents, among others:
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Farc42%2FPDFminion.svg?type=shield&issueType=security)](https://app.fossa.com/projects/git%2Bgithub.com%2Farc42%2FPDFminion?ref=badge_shield&issueType=security)
 
+### Experimental Badges
+
+[![Lines-of-Code](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/gernotstarke/6cea11743115436277c8c04f500f4af8/raw/minion-loc.json)](https://github.com/arc42/PDFminion/actions/workflows/go-test.yml)
+
 ### Explanation
 
 The low test coverage stems from the fact that a lot of functionality can only be realistically tested by manually inspecting the generated PDF files.
@@ -31,7 +35,7 @@ The low test coverage stems from the fact that a lot of functionality can only b
 ## Features
 
 When creating multiple PDF documents, you often need to add page numbers, headers, footers, or combine multiple PDF files into a single file.
-PDFminion can do that for you - from a terminal and the command line, on MacOS, Linux and Windows platforms.
+PDFminion can do that for you - from a terminal and the command line, on macOS, Linux and Windows platforms.
 
 
 ## Installation and usage
