@@ -72,7 +72,7 @@ func MapSystemToAppLanguage() language.Tag {
 		// Check if detected language is supported
 		tag, _, _ = matcher.Match(tag)
 		if base, conf := tag.Base(); conf != language.No {
-			log.Debug().Str("language", base.String()).Msg("Mapped detected language to English")
+			log.Debug().Msg("Detected language is supported")
 			return language.Make(base.String())
 		}
 	}

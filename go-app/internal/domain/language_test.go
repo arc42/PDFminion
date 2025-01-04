@@ -49,7 +49,36 @@ func TestGermanSystemDefaults(t *testing.T) {
 	assert.Equal(t, expectedTexts.BlankPageText, config.BlankPageText, "Blank page text should be in German")
 }
 
-func TestThatUncommonLanguageWillMapToEnglish(t *testing.T) {
+func TestFrenchSystemDefaults(t *testing.T) {
+	// Backup original environment
+	origLang := os.Getenv("LANG")
+	origLcAll := os.Getenv("LC_ALL")
+	defer func() {
+		os.Setenv("LANG", origLang)
+		os.Setenv("LC_ALL", origLcAll)
+	}()
+
+	// Set French system locale
+	os.Setenv("LANG", "fr_FR.UTF-8")
+	os.Setenv("LC_ALL", "fr_FR.UTF-8")
+
+	// Get the system language (this should now detect German)
+	systemLang := MapSystemToAppLanguage()
+
+	// Create default config with detected language
+	config := NewDefaultConfig(systemLang)
+
+	// Verify that German was detected
+	assert.Equal(t, language.French, config.Language, "System language should be German")
+
+	// Verify that German texts were used
+	expectedTexts := DefaultTexts[language.French]
+	assert.Equal(t, expectedTexts.ChapterPrefix, config.ChapterPrefix, "Chapter prefix should be in French")
+	assert.Equal(t, expectedTexts.RunningHeader, config.RunningHeader, "Running header should be in French")
+	assert.Equal(t, expectedTexts.BlankPageText, config.BlankPageText, "Blank page text should be in French")
+}
+
+func TestUncommonLanguageWillMapToEnglish(t *testing.T) {
 	// Backup original environment
 	origLang := os.Getenv("LANG")
 	origLcAll := os.Getenv("LC_ALL")

@@ -25,7 +25,7 @@ func PrintFinalConfiguration(myConfig MinionConfig) {
 	fmt.Printf("Running header: %s\n", myConfig.RunningHeader)
 	fmt.Printf("Chapter prefix: %s\n", myConfig.ChapterPrefix)
 	fmt.Printf("Separator: %s\n", myConfig.Separator)
-	fmt.Printf("Page prefix: %s\n", myConfig.PagePrefix)
+	fmt.Printf("Page prefix: %s\n", myConfig.PageNrPrefix)
 	fmt.Printf("Total page count prefix: %s\n", myConfig.PageCountPrefix)
 	fmt.Printf("Blank page text: %s\n", myConfig.BlankPageText)
 	fmt.Println(strings.Repeat("=", 20))

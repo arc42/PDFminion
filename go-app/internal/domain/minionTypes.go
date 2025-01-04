@@ -47,7 +47,7 @@ type MinionConfig struct {
 	RunningHeader   string
 	ChapterPrefix   string
 	Separator       string
-	PagePrefix      string
+	PageNrPrefix    string
 	PageCountPrefix string
 	BlankPageText   string
 
@@ -88,7 +88,7 @@ func NewDefaultConfig(systemLanguage language.Tag) *MinionConfig {
 		// Use language-specific texts
 		ChapterPrefix:   texts.ChapterPrefix,
 		RunningHeader:   texts.RunningHeader,
-		PagePrefix:      texts.PageNumber,
+		PageNrPrefix:    texts.PageNumber,
 		PageCountPrefix: texts.PageCountPrefix,
 		BlankPageText:   texts.BlankPageText,
 		Separator:       DefaultSeparator,
@@ -113,7 +113,7 @@ func (c *MinionConfig) MergeWith(other *MinionConfig) error {
 			texts := DefaultTexts[other.Language]
 			c.ChapterPrefix = texts.ChapterPrefix
 			c.RunningHeader = texts.RunningHeader
-			c.PagePrefix = texts.PageNumber
+			c.PageNrPrefix = texts.PageNumber
 			c.PageCountPrefix = texts.PageCountPrefix
 			c.BlankPageText = texts.BlankPageText
 		}
@@ -141,8 +141,11 @@ func (c *MinionConfig) MergeWith(other *MinionConfig) error {
 	if other.ChapterPrefix != "" {
 		c.ChapterPrefix = other.ChapterPrefix
 	}
-	if other.PagePrefix != "" {
-		c.PagePrefix = other.PagePrefix
+	if other.PageNrPrefix != "" {
+		c.PageNrPrefix = other.PageNrPrefix
+	}
+	if other.PageCountPrefix != "" {
+		c.PageCountPrefix = other.PageCountPrefix
 	}
 	if other.BlankPageText != "" {
 		c.BlankPageText = other.BlankPageText

@@ -190,7 +190,7 @@ func watermarkConfigurationForFile(chapterNr, previousPageNr, pageCount int) map
 	for page := 1; page <= (pageCount); page++ {
 		var currentPageNr = previousPageNr + page
 		var chapterStr = appConfig.ChapterPrefix + strconv.Itoa(chapterNr)
-		var pageStr = appConfig.PagePrefix + strconv.Itoa(currentPageNr)
+		var pageStr = appConfig.PageNrPrefix + strconv.Itoa(currentPageNr)
 
 		wmcs[page], _ = api.TextWatermark(chapterStr+appConfig.Separator+pageStr,
 			waterMarkDescription(currentPageNr), true, false, types.POINTS)

@@ -176,7 +176,7 @@ func loadFlagConfig() *domain.MinionConfig {
 		fconfig.SetFields["separator"] = true
 	}
 	if flagHasBeenProvided("page-prefix") {
-		fconfig.PagePrefix = viper.GetString("page-prefix")
+		fconfig.PageNrPrefix = viper.GetString("page-prefix")
 		fconfig.SetFields["pageprefix"] = true
 	}
 	if flagHasBeenProvided("page-count-prefix") {

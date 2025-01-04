@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/text/language"
 	"testing"
@@ -10,7 +11,7 @@ func TestDefaultConfigIsEnglish(t *testing.T) {
 	base := NewDefaultConfig(language.English)
 
 	// the language specific values should be set to the English values
-	assert.Equal(t, DefaultPageNrPrefix, base.PagePrefix)
+	assert.Equal(t, DefaultPageNrPrefix, base.PageNrPrefix)
 	assert.Equal(t, DefaultChapterPrefix, base.ChapterPrefix)
 	assert.Equal(t, DefaultPageCountPrefix, base.PageCountPrefix)
 	assert.Equal(t, DefaultBlankPageText, base.BlankPageText)
@@ -20,7 +21,7 @@ func TestDefaultConfigLanguageGerman(t *testing.T) {
 	base := NewDefaultConfig(language.German)
 
 	// the language specific values should be set to the German values
-	assert.Equal(t, DefaultTexts[language.German].PageNumber, base.PagePrefix)
+	assert.Equal(t, DefaultTexts[language.German].PageNumber, base.PageNrPrefix)
 	assert.Equal(t, DefaultTexts[language.German].ChapterPrefix, base.ChapterPrefix)
 	assert.Equal(t, DefaultTexts[language.German].PageCountPrefix, base.PageCountPrefix)
 	assert.Equal(t, DefaultTexts[language.German].BlankPageText, base.BlankPageText)
@@ -29,7 +30,7 @@ func TestDefaultConfigLanguageGerman(t *testing.T) {
 func TestDefaultConfigLanguageFrench(t *testing.T) {
 	base := NewDefaultConfig(language.French)
 
-	assert.Equal(t, DefaultTexts[language.French].PageNumber, base.PagePrefix)
+	assert.Equal(t, DefaultTexts[language.French].PageNumber, base.PageNrPrefix)
 	assert.Equal(t, DefaultTexts[language.French].ChapterPrefix, base.ChapterPrefix)
 	assert.Equal(t, DefaultTexts[language.French].PageCountPrefix, base.PageCountPrefix)
 	assert.Equal(t, DefaultTexts[language.French].BlankPageText, base.BlankPageText)
@@ -40,7 +41,7 @@ func TestDefaultConfigLanguageUnknown(t *testing.T) {
 	base := NewDefaultConfig(language.Zulu)
 
 	// the language specific values should be set to the English values
-	assert.Equal(t, DefaultTexts[language.English].PageNumber, base.PagePrefix)
+	assert.Equal(t, DefaultTexts[language.English].PageNumber, base.PageNrPrefix)
 	assert.Equal(t, DefaultTexts[language.English].ChapterPrefix, base.ChapterPrefix)
 	assert.Equal(t, DefaultTexts[language.English].PageCountPrefix, base.PageCountPrefix)
 	assert.Equal(t, DefaultTexts[language.English].BlankPageText, base.BlankPageText)
@@ -61,7 +62,7 @@ func TestDefaultConfigMergeWithFlagGerman(t *testing.T) {
 
 	// the language specific values should be set to the German values
 	// the language specific values should be set to the German values
-	assert.Equal(t, DefaultTexts[language.German].PageNumber, base.PagePrefix)
+	assert.Equal(t, DefaultTexts[language.German].PageNumber, base.PageNrPrefix)
 	assert.Equal(t, DefaultTexts[language.German].ChapterPrefix, base.ChapterPrefix)
 	assert.Equal(t, DefaultTexts[language.German].PageCountPrefix, base.PageCountPrefix)
 	assert.Equal(t, DefaultTexts[language.German].BlankPageText, base.BlankPageText)
@@ -81,11 +82,135 @@ func TestDefaultConfigMergeWithFlagFrench(t *testing.T) {
 	assert.NoError(t, base.MergeWith(french), "MergeWith should not return an error")
 
 	// the language specific values should be set to the German values
-	// the language specific values should be set to the German values
-	assert.Equal(t, DefaultTexts[language.French].PageNumber, base.PagePrefix)
+	assert.Equal(t, DefaultTexts[language.French].PageNumber, base.PageNrPrefix)
 	assert.Equal(t, DefaultTexts[language.French].ChapterPrefix, base.ChapterPrefix)
 	assert.Equal(t, DefaultTexts[language.French].PageCountPrefix, base.PageCountPrefix)
 	assert.Equal(t, DefaultTexts[language.French].BlankPageText, base.BlankPageText)
+}
+
+// set new default language, override page and chapter prefix
+func TestDefaultConfigMergeWithFlagGermanAndOverride(t *testing.T) {
+	base := NewDefaultConfig(language.English)
+
+	const newPagePrefix = "S."
+	const newChapterPrefix = "Kap."
+
+	germanWithOverride := &MinionConfig{
+		Language:      language.German,
+		PageNrPrefix:  newPagePrefix,
+		ChapterPrefix: newChapterPrefix,
+		SetFields: map[string]bool{
+			"language":      true,
+			"pagePrefix":    true,
+			"chapterPrefix": true},
+	}
+
+	// can merge without error
+	assert.NoError(t, base.MergeWith(germanWithOverride), "MergeWith should not return an error")
+
+	// the overridden values should be set to the new values
+	assert.Equal(t, newPagePrefix, base.PageNrPrefix)
+	assert.Equal(t, newChapterPrefix, base.ChapterPrefix)
+
+	// the other language specific values should be set to the German values
+	assert.Equal(t, DefaultTexts[language.German].PageCountPrefix, base.PageCountPrefix)
+	assert.Equal(t, DefaultTexts[language.German].BlankPageText, base.BlankPageText)
+}
+
+func TestDefaultConfigMergeWithFlagGermanAndOverrideBlankPageText(t *testing.T) {
+	const newBlankPageText = "absichtlich frei"
+
+	base := NewDefaultConfig(language.English)
+
+	assert.Equal(t, DefaultTexts[language.English].BlankPageText, base.BlankPageText)
+	assert.NotEqual(t, DefaultTexts[language.German].BlankPageText, newBlankPageText)
+
+	germanWithOverride := &MinionConfig{
+		Language:      language.German,
+		BlankPageText: newBlankPageText,
+		SetFields:     map[string]bool{"language": true}}
+
+	// can merge without error
+	assert.NoError(t, base.MergeWith(germanWithOverride), "MergeWith should not return an error")
+
+	fmt.Printf(base.BlankPageText)
+
+	// the overridden values should be set to the new values
+	assert.Equal(t, newBlankPageText, base.BlankPageText)
+
+	// the other language specific values should be set to the German values
+	assert.Equal(t, DefaultTexts[language.German].PageNumber, base.PageNrPrefix)
+	assert.Equal(t, DefaultTexts[language.German].ChapterPrefix, base.ChapterPrefix)
+	assert.Equal(t, DefaultTexts[language.German].PageCountPrefix, base.PageCountPrefix)
+
+}
+
+func TestDefaultCanOverrideSource(t *testing.T) {
+	defaultConfig := NewDefaultConfig(language.English)
+	assert.Equal(t, DefaultSourceDir, defaultConfig.SourceDir)
+
+	other := &MinionConfig{
+		SourceDir: "/new/source",
+		SetFields: map[string]bool{"source": true},
+	}
+
+	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.Equal(t, "/new/source", defaultConfig.SourceDir)
+}
+
+func TestDefaultCanOverrideTarget(t *testing.T) {
+	defaultConfig := NewDefaultConfig(language.English)
+	assert.Equal(t, DefaultTargetDir, defaultConfig.TargetDir)
+
+	const newTargetDir = "/new/target"
+
+	other := &MinionConfig{
+		TargetDir: newTargetDir,
+		SetFields: map[string]bool{"target": true},
+	}
+	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.Equal(t, newTargetDir, defaultConfig.TargetDir)
+}
+
+func TestDefaultCanOverrideChapterPrefix(t *testing.T) {
+	defaultConfig := NewDefaultConfig(language.English)
+	assert.Equal(t, DefaultChapterPrefix, defaultConfig.ChapterPrefix)
+
+	const newChapterPrefix = "xyz"
+	other := &MinionConfig{
+		ChapterPrefix: newChapterPrefix,
+	}
+
+	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.Equal(t, newChapterPrefix, defaultConfig.ChapterPrefix)
+}
+
+func TestDefaultCanOverridePageNrPrefix(t *testing.T) {
+	const newPageNrPrefix = "xyz"
+	defaultConfig := NewDefaultConfig(language.English)
+	assert.Equal(t, DefaultPageNrPrefix, defaultConfig.PageNrPrefix)
+	assert.NotEqual(t, DefaultPageNrPrefix, newPageNrPrefix)
+
+	other := &MinionConfig{
+		PageNrPrefix: newPageNrPrefix,
+	}
+
+	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.Equal(t, newPageNrPrefix, defaultConfig.PageNrPrefix)
+}
+
+func TestDefaultCanOverridePageCountPrefix(t *testing.T) {
+	const newPageCountPrefix = "xyz"
+	defaultConfig := NewDefaultConfig(language.English)
+	assert.Equal(t, DefaultPageCountPrefix, defaultConfig.PageCountPrefix)
+	assert.NotEqual(t, DefaultPageCountPrefix, newPageCountPrefix)
+
+	other := &MinionConfig{
+		PageCountPrefix: newPageCountPrefix,
+	}
+
+	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.Equal(t, newPageCountPrefix, defaultConfig.PageCountPrefix)
 }
 
 func TestMinionConfig_MergeWithMinimal(t *testing.T) {
