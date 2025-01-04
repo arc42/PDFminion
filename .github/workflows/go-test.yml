@@ -76,3 +76,22 @@ jobs:
           message: ${{ env.COVERAGE }}%
           color: ${{ env.COVERAGE >= 80 && 'green' || env.COVERAGE >= 60 && 'yellow' || 'red' }}
         if: always()
+
+      - name: Install cloc
+        run: sudo apt-get install cloc
+
+      - name: Count Lines of Code
+        run: |
+            LOC=$(cloc --json --include-lang=Go . | jq '.SUM.code')
+            echo "LOC=${LOC}" >> $GITHUB_ENV
+
+      - name: Create Lines of Code Badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.DYNAMIC_GIST_ACTION }}
+          gistID: ${{ secrets.DYNA_GIST_ID }}
+          filename: minion-loc.json
+          label: Lines of Code
+          message: ${{ env.LOC }}
+          color: lightblue
+       if: always()

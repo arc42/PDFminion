@@ -213,6 +213,21 @@ func TestDefaultCanOverridePageCountPrefix(t *testing.T) {
 	assert.Equal(t, newPageCountPrefix, defaultConfig.PageCountPrefix)
 }
 
+func TestDefaultCanOverrideBlankPageText(t *testing.T) {
+	const newBlankPageText = "blankPage"
+
+	defaultConfig := NewDefaultConfig(language.English)
+	assert.Equal(t, DefaultBlankPageText, defaultConfig.BlankPageText)
+	assert.NotEqual(t, DefaultBlankPageText, newBlankPageText)
+
+	other := &MinionConfig{
+		BlankPageText: newBlankPageText,
+	}
+
+	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.Equal(t, newBlankPageText, defaultConfig.BlankPageText)
+}
+
 func TestMinionConfig_MergeWithMinimal(t *testing.T) {
 	minimalBaseConfig := &MinionConfig{SourceDir: "/original/source"}
 	other := &MinionConfig{
