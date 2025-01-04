@@ -11,11 +11,10 @@ import (
 )
 
 var (
-	defaultConfig      *domain.MinionConfig
-	homeDirFileConfig  *domain.MinionConfig
-	localDirFileConfig *domain.MinionConfig
-	flagConfig         *domain.MinionConfig
-	minionConfig       *domain.MinionConfig
+	// homeDirFileConfig  *domain.MinionConfig
+	// localDirFileConfig *domain.MinionConfig
+	// flagConfig         *domain.MinionConfig
+	minionConfig *domain.MinionConfig
 )
 
 // LoadConfig collects configuration from all sources and merges them

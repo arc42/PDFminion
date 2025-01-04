@@ -40,7 +40,7 @@ INSTALL_DIR=/usr/local/bin
 .PHONY: default all clean test compile-all run install uninstall release mac \
         compile-windows-amd64 compile-linux-amd64 compile-darwin-amd64 compile-darwin-arm64 \
         package-windows-amd64 package-linux-amd64 package-darwin-amd64 package-darwin-arm64 \
-        docker-test-linux lint
+        docker-test-linux lint count install-gotestsum cover
 
 
 # Directory targets
@@ -142,8 +142,23 @@ release: package-windows-amd64 package-linux-amd64 package-darwin-amd64 package-
 	@echo "All platform builds completed!"
 	@ls -l $(DIST_DIR)
 
-test:
-	$(GOTEST) -v ./...
+
+# Add new targets (near the test target):
+install-gotestsum:
+	go install gotest.tools/gotestsum@latest
+
+test: install-gotestsum
+	gotestsum --format=testdox ./...
+
+count:
+	cloc --exclude-dir=vendor,dist,build .
+
+# Target to calculate coverage for all packages
+cover:
+	@echo "Calculating test coverage for all packages..."
+	@go test -coverprofile=coverage.out ./...
+	@echo "Package coverage summary:"
+	@go tool cover -func=coverage.out | tail -n1 | sed 's/\s\+/ /g' | sed 's/%%/%/'
 
 # Test binaries in containers
 docker-test-linux: compile-linux-amd64

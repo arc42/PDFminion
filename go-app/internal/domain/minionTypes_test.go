@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/text/language"
 	"testing"
@@ -132,9 +131,7 @@ func TestDefaultConfigMergeWithFlagGermanAndOverrideBlankPageText(t *testing.T) 
 
 	// can merge without error
 	assert.NoError(t, base.MergeWith(germanWithOverride), "MergeWith should not return an error")
-
-	fmt.Printf(base.BlankPageText)
-
+	
 	// the overridden values should be set to the new values
 	assert.Equal(t, newBlankPageText, base.BlankPageText)
 
@@ -226,6 +223,20 @@ func TestDefaultCanOverrideBlankPageText(t *testing.T) {
 
 	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
 	assert.Equal(t, newBlankPageText, defaultConfig.BlankPageText)
+}
+
+func TestDefaultCanOverrideSeparator(t *testing.T) {
+	const newSeparator = "/"
+	defaultConfig := NewDefaultConfig(language.English)
+	assert.Equal(t, DefaultSeparator, defaultConfig.Separator)
+	assert.NotEqual(t, DefaultSeparator, newSeparator)
+
+	other := &MinionConfig{
+		Separator: newSeparator,
+	}
+
+	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.Equal(t, newSeparator, defaultConfig.Separator)
 }
 
 func TestMinionConfig_MergeWithMinimal(t *testing.T) {

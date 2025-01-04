@@ -25,12 +25,12 @@ excerpt: "**For all those who like handouts with page numbers and running header
         PDFminion adds page numbers and running-headers on pdf documents, helping to produce useful handouts.
         <br>
         It's open-source, runs on all major platforms and is free to use.
-        <br>    
+        <br>
         <p>Brought to you by</p>
         <div class="logo">
             <a href="https://arc42.org/" target="_blank" rel="noopener noreferrer nofollow">
             <img src="assets/images/arc42-logo.png" alt="arc42">
-            </a>   
+            </a>
         </div>
 
     </p>
@@ -69,7 +69,7 @@ excerpt: "**For all those who like handouts with page numbers and running header
             <h5>Add Personal Touch</h5>
             <p>Who said PDF documents couldn't have a personal touch? Thanx to <a href="https://www.sketchnotes.tech/">Lisa, @teapot418</a>.</p>
         </div>
-    
+
         <div class="box box--primary box-third">
             <img src="assets/images/functions/chapter-number.png" alt="chapter numbers" class="img-half">
             <h5>Chapter Number</h5>
@@ -119,8 +119,8 @@ excerpt: "**For all those who like handouts with page numbers and running header
 <section id="installation" markdown="1">
 
 <h1>Installation</h1>
-    
-PDFminion runs on all major (desktop) operating systems. 
+
+PDFminion runs on all major (desktop) operating systems.
 You can download an appropriate version and install it yourself, or you can use one of our installation options.
 
 If you're nerdy enough, you can [fork the repo](https://github.com/arc42/pdfminion), and build your own executable version, either with `make` or `go build`.
@@ -174,7 +174,7 @@ To evenify a file means adding a blank page at the end of the file if the page-c
 That means that the first page of every file in a group will always start on the front-page of paper,
 even in case of double-sided printing.
 
-Chapters in technical or scientific books traditionally start on odd (right-hand) pages to ensure consistency, 
+Chapters in technical or scientific books traditionally start on odd (right-hand) pages to ensure consistency,
 readability, and prominence, aligning with classic book design practices.
 
 
@@ -219,9 +219,9 @@ If no command is given, all flags are evaluate, validated and PDF processing is 
 |-----------|-------------------|-------------------|--------------------|
 | **Source Directory** | `--source <directory>` | `-s <directory>`| Specifies the input directory for PDF files. Default is `./_pdfs` Example: `pdfminion --source ./input`|
 | **Target Directory** | `--target <directory>` | `-t <directory>` | Specifies the output directory for processed files. Default is `_target`. Creates the directory if it doesn’t exist. Example: `pdfminion --target ./out`|
-| **Force Overwrite**  | `--force`              | `-f`    | Allows overwriting existing files in the target directory. Example: `pdfminion --force` |
+| **Force Overwrite**  | `--force`              | `-f`    | Allows overwriting existing files in the target directory. Default: `false`. Example: `pdfminion --force` |
 | **Config File**  | `--config <filename>`  | `-c <filename>` | Loads configuration from a file. It needs to be a yaml file. Example: `pdfminion --config settings.yaml`  |
-| **Verbose Mode**    | `--verbose`     |                | Gives detailed processing output. Example: `pdfminion --verbose` |
+| **Verbose Mode**    | `--verbose`     |                | Gives detailed processing output. Default: `false`. Example: `pdfminion --verbose` |
 
 
 <h2>Page Related Settings</h2>
@@ -240,7 +240,8 @@ Set the running head, the page- and chapter prefix etc.
 
 Please note: Most of these processing defaults are language-specific: The German language, for example, uses "Seite" for "Page" and "Kapitel" for "Chapter".
 
-
+If you set a language (e.g German, DE), then the defaults of that language will be used.
+You can still override some (or all) of these settings, though (see [example 6](#examples)).
 
 
 <h2>Multi-Language Support</h2>
@@ -292,9 +293,9 @@ After all files have been processed, PDFminion can perform some post-processing.
 >`$ pdfminion --force --source ./input --target ./output`
 >
 
-> **Example 3**: Show all default settings for current language setting
+> **Example 3**: Show all current configuration items
 >
->`$ pdfminion defaults`
+>`$ pdfminion settings`
 >
 
 <hr>
@@ -304,11 +305,23 @@ After all files have been processed, PDFminion can perform some post-processing.
 >
 <hr>
 
+> **Example 5**: List available languages for the `--language` flag
+>
+>`$ pdfminion ll`
+>`$ pdfminion list-languages`
+>
+<hr>
+
+> **Example 6**: Set a language with the `--language` flag and override one of the defaults
+>
+>`$ pdfminion --language=EN --page-prefix=pg.`
+>
+<hr>
 
 > **Example 41**: Gives credit to the maintainers of the open-source libraries used by PDFminion, e.g. [pdfcpu](https://pdfcpu.io/) and a few others..
-
-```shell
-$ pdfminion --thanx
+>
+>`$ pdfminion thanx`
+>
 
 PDFminion was created on the shoulder of giants...
 ```

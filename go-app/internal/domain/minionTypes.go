@@ -16,7 +16,11 @@ const (
 	DefaultSeparator       = " - "
 	DefaultPageCountPrefix = "of"
 	DefaultBlankPageText   = "Intentionally left blank"
+	DefaultForce           = false
+	DefaultEvenify         = true
+	DefaultMerge           = false
 	DefaultMergeFileName   = "merged.pdf"
+	DefaultPersonalTouch   = false
 )
 
 // MinionConfig holds the configuration for the PDFMinion application
@@ -78,9 +82,9 @@ func NewDefaultConfig(systemLanguage language.Tag) *MinionConfig {
 		Verbose:       false,
 		SourceDir:     DefaultSourceDir,
 		TargetDir:     DefaultTargetDir,
-		Force:         false,
-		Evenify:       true,
-		Merge:         false,
+		Force:         DefaultForce,
+		Evenify:       DefaultEvenify,
+		Merge:         DefaultMerge,
 		MergeFileName: DefaultMergeFileName,
 
 		ConfigFileName: MinionConfigFileName,
@@ -93,7 +97,7 @@ func NewDefaultConfig(systemLanguage language.Tag) *MinionConfig {
 		BlankPageText:   texts.BlankPageText,
 		Separator:       DefaultSeparator,
 
-		PersonalTouch: false,
+		PersonalTouch: DefaultPersonalTouch,
 		SetFields:     make(map[string]bool),
 	}
 }

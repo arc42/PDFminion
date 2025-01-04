@@ -33,7 +33,7 @@ var (
 			BlankPageText:   "Diese Seite bleibt absichtlich leer",
 		},
 		language.English: {
-			RunningHeader:   "",
+			RunningHeader:   DefaultRunningHeader,
 			ChapterPrefix:   DefaultChapterPrefix,
 			PageCountPrefix: "of",
 			PageNumber:      DefaultPageNrPrefix,
