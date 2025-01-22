@@ -1,23 +1,14 @@
 package config
 
 import (
-	"golang.org/x/text/language"
-	"os"
-	"path/filepath"
-
+	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
+	"golang.org/x/text/language"
 	"pdfminion/internal/domain"
 )
 
-var (
-	// homeDirFileConfig  *domain.MinionConfig
-	// localDirFileConfig *domain.MinionConfig
-	// flagConfig         *domain.MinionConfig
-	minionConfig *domain.MinionConfig
-)
-
-// LoadConfig collects configuration from all sources and merges them
+// ConfigureApplication collects configuration from all sources and merges them
 // Priority order:
 // 1. (lowest priority) default,  depending on system language,
 // 2. home directory config file (if exists):
@@ -28,14 +19,19 @@ var (
 //
 // In steps 2-4 we need to consider "unset" boolean values: If a boolean value is not set in the
 // configuration (file or flag), it must not override the previously set value.
-// Therefore we introduced metadata ("SetFields") to MinionConfig.
-func LoadConfig() (*domain.MinionConfig, error) {
+// Therefore, we introduced metadata ("SetFields") to ActiveMinionConfig.
+func ConfigureApplication(verbose bool) (domain.MinionConfig, error) {
 
-	log.Debug().Msg("starting LoadConfig")
+	if verbose {
+		fmt.Println("starting to configure  application")
+	}
+	log.Debug().Msg("starting ConfigureApplication")
 
 	// 0. Start with system language detection
 	systemLang := domain.MapSystemToAppLanguage()
-
+	if verbose {
+		fmt.Printf("System language detected: %s\n", systemLang.String())
+	}
 	log.Debug().Str("language", systemLang.String()).Msg("detected")
 
 	// Parse individual configuration sources
@@ -59,17 +55,25 @@ func LoadConfig() (*domain.MinionConfig, error) {
 
 	// Merge configurations in priority order
 
-	//minionConfig.MergeWith(homeDirFileConfig)
-	//minionConfig.MergeWith(localDirFileConfig)
+	// ActiveMinionConfig.MergeWith(homeDirFileConfig)
+	// ActiveMinionConfig.MergeWith(localDirFileConfig)
+
+	if verbose {
+		fmt.Println("merging default and flag configuration")
+	}
+
 	err := minionConfig.MergeWith(flagConfig)
 	if err != nil {
 		log.Debug().Err(err).Msg("Failed to merge flag configuration")
 	}
 
+	if verbose {
+		domain.PrintFinalConfiguration(&minionConfig)
+	}
 	return minionConfig, nil
 }
 
-func loadDefaultConfig() *domain.MinionConfig {
+func loadDefaultConfig() domain.MinionConfig {
 	log.Debug().Msg("loading default configuration")
 
 	// Detect system language
@@ -87,41 +91,8 @@ func loadDefaultConfig() *domain.MinionConfig {
 	return domain.NewDefaultConfig(systemLang)
 }
 
-func loadHomeConfig(filename string) (*domain.MinionConfig, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
-	}
-
-	viper.SetConfigFile(filepath.Join(homeDir, filename))
-	if err := viper.MergeInConfig(); err != nil {
-		return nil, err
-	}
-
-	var config domain.MinionConfig
-	if err := viper.Unmarshal(&config); err != nil {
-		return nil, err
-	}
-
-	return &config, nil
-}
-
-func loadLocalConfig(filename string) (*domain.MinionConfig, error) {
-	viper.SetConfigFile(filename)
-	if err := viper.MergeInConfig(); err != nil {
-		return nil, err
-	}
-
-	var config domain.MinionConfig
-	if err := viper.Unmarshal(&config); err != nil {
-		return nil, err
-	}
-
-	return &config, nil
-}
-
 // loadFlagConfig loads the configuration from command line flags
-func loadFlagConfig() *domain.MinionConfig {
+func loadFlagConfig() domain.MinionConfig {
 	log.Debug().Msg("loading flag configuration")
 
 	// initialize local fconfig with empty metadata SetFields
@@ -129,35 +100,21 @@ func loadFlagConfig() *domain.MinionConfig {
 		SetFields: make(map[string]bool),
 	}
 
-	if flagHasBeenProvided("verbose") {
-		fconfig.Verbose = viper.GetBool("verbose")
-		fconfig.SetFields["verbose"] = true
+	// to avoid the too-long-function linter error, we split the flag loading
+	loadFlagProcessingConfig(fconfig)
+
+	loadFlagTextOnPageConfig(fconfig)
+
+	if flagHasBeenProvided("personal") {
+		fconfig.PersonalTouch = viper.GetBool("personal")
+		fconfig.SetFields["personal"] = true
 	}
-	if flagHasBeenProvided("source") {
-		fconfig.SourceDir = viper.GetString("source")
-		fconfig.SetFields["sourcedir"] = true
-	}
-	if flagHasBeenProvided("target") {
-		fconfig.TargetDir = viper.GetString("target")
-		fconfig.SetFields["targetdir"] = true
-	}
-	if flagHasBeenProvided("force") {
-		fconfig.Force = viper.GetBool("force")
-		fconfig.SetFields["force"] = true
-	}
-	if flagHasBeenProvided("evenify") {
-		fconfig.Evenify = viper.GetBool("evenify")
-		fconfig.SetFields["evenify"] = true
-	}
-	if flagHasBeenProvided("merge") {
-		fconfig.Merge = true
-		fconfig.MergeFileName = viper.GetString("merge")
-		fconfig.SetFields["merge"] = true
-	}
-	if flagHasBeenProvided("config") {
-		fconfig.ConfigFileName = viper.GetString("config")
-		fconfig.SetFields["configfilename"] = true
-	}
+
+	return fconfig
+
+}
+
+func loadFlagTextOnPageConfig(fconfig domain.MinionConfig) {
 	if flagHasBeenProvided("language") {
 		fconfig.Language = domain.ParseLanguageCode(viper.GetString("language"))
 		fconfig.SetFields["language"] = true
@@ -186,13 +143,34 @@ func loadFlagConfig() *domain.MinionConfig {
 		fconfig.BlankPageText = viper.GetString("blank-page-text")
 		fconfig.SetFields["blankpagetext"] = true
 	}
-	if flagHasBeenProvided("personal") {
-		fconfig.PersonalTouch = viper.GetBool("personal")
-		fconfig.SetFields["personal"] = true
+}
+
+func loadFlagProcessingConfig(fconfig domain.MinionConfig) {
+	if flagHasBeenProvided("verbose") {
+		fconfig.Verbose = viper.GetBool("verbose")
+		fconfig.SetFields["verbose"] = true
 	}
-
-	return &fconfig
-
+	if flagHasBeenProvided("source") {
+		fconfig.SourceDir = viper.GetString("source")
+		fconfig.SetFields["sourcedir"] = true
+	}
+	if flagHasBeenProvided("target") {
+		fconfig.TargetDir = viper.GetString("target")
+		fconfig.SetFields["targetdir"] = true
+	}
+	if flagHasBeenProvided("force") {
+		fconfig.Force = viper.GetBool("force")
+		fconfig.SetFields["force"] = true
+	}
+	if flagHasBeenProvided("evenify") {
+		fconfig.Evenify = viper.GetBool("evenify")
+		fconfig.SetFields["evenify"] = true
+	}
+	if flagHasBeenProvided("merge") {
+		fconfig.Merge = true
+		fconfig.MergeFileName = viper.GetString("merge")
+		fconfig.SetFields["merge"] = true
+	}
 }
 
 // flagHasBeenProvided checks if a flag has been explicitly provided on the command line
@@ -204,16 +182,3 @@ func flagHasBeenProvided(flagName string) bool {
 	}
 	return flag.Changed
 }
-
-/*func setupLogging(verbose bool) {
-	level := zerolog.InfoLevel
-	if verbose {
-		level = zerolog.DebugLevel
-	}
-
-	log.Logger = zerolog.New(zerolog.ConsoleWriter{
-		Out:        os.Stderr,
-		TimeFormat: "15:04:05",
-	}).Level(level).With().Timestamp().Logger()
-}
-*/

@@ -1,3 +1,6 @@
+//go:build exclude_from_coverage
+// +build exclude_from_coverage
+
 package main
 
 import (

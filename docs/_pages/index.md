@@ -220,7 +220,10 @@ If no command is given, all flags are evaluate, validated and PDF processing is 
 | **Source Directory** | `--source <directory>` | `-s <directory>`| Specifies the input directory for PDF files. Default is `./_pdfs` Example: `pdfminion --source ./input`|
 | **Target Directory** | `--target <directory>` | `-t <directory>` | Specifies the output directory for processed files. Default is `_target`. Creates the directory if it doesn’t exist. Example: `pdfminion --target ./out`|
 | **Force Overwrite**  | `--force`              | `-f`    | Allows overwriting existing files in the target directory. Default: `false`. Example: `pdfminion --force` |
+
+<!-- see ADR-0011, config files have been postponed
 | **Config File**  | `--config <filename>`  | `-c <filename>` | Loads configuration from a file. It needs to be a yaml file. Example: `pdfminion --config settings.yaml`  |
+-->
 | **Verbose Mode**    | `--verbose`     |                | Gives detailed processing output. Default: `false`. Example: `pdfminion --verbose` |
 
 
@@ -326,10 +329,11 @@ After all files have been processed, PDFminion can perform some post-processing.
 PDFminion was created on the shoulder of giants...
 ```
 
+<!-- see ADR-0011, config files have been postponed to a later release
 <br>
 <a href="/downloads/pdfminion-config.yaml" download="pdfminion-config.yaml" class="btn btn--primary">Download example config file</a>
 
-
+-->
 
 
 </div>

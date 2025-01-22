@@ -6,21 +6,21 @@ import (
 )
 
 const (
-	MinionConfigFileName = "pdfminion.yaml"
-
-	DefaultRunningHeader   = "" // empty
-	DefaultSourceDir       = "_pdfs"
-	DefaultTargetDir       = "_target"
-	DefaultPageNrPrefix    = "Page"
-	DefaultChapterPrefix   = "Chapter"
-	DefaultSeparator       = " - "
-	DefaultPageCountPrefix = "of"
-	DefaultBlankPageText   = "Intentionally left blank"
-	DefaultForce           = false
+	DefaultBlankPageText = "Intentionally left blank"
+	DefaultChapterPrefix = "Chapter"
+	//	DefaultConfigFileName  = "pdfminion.yaml"
 	DefaultEvenify         = true
+	DefaultForce           = false
 	DefaultMerge           = false
 	DefaultMergeFileName   = "merged.pdf"
+	DefaultPageCountPrefix = "of"
+	DefaultPageNrPrefix    = "Page"
 	DefaultPersonalTouch   = false
+	DefaultRunningHeader   = "" // empty
+	DefaultSeparator       = " - "
+	DefaultSourceDir       = "_pdfs"
+	DefaultTargetDir       = "_target"
+	DefaultVerbose         = false
 )
 
 // MinionConfig holds the configuration for the PDFMinion application
@@ -32,7 +32,7 @@ const (
 
 type MinionConfig struct {
 	// General settings
-	ConfigFileName      string
+	//	ConfigFileName      string see ADR-0011, config file have been postponed
 	ConfigFileNameValid bool
 	Language            language.Tag
 	Verbose             bool
@@ -67,7 +67,7 @@ type MinionConfig struct {
 
 // NewDefaultConfig creates a new configuration with default values,
 // using the system language for texts
-func NewDefaultConfig(systemLanguage language.Tag) *MinionConfig {
+func NewDefaultConfig(systemLanguage language.Tag) MinionConfig {
 	log.Debug().Msg("Creating new default configuration")
 
 	// Get corresponding texts for the provided language
@@ -78,17 +78,17 @@ func NewDefaultConfig(systemLanguage language.Tag) *MinionConfig {
 		texts = DefaultTexts[language.English]
 	}
 
-	return &MinionConfig{
-		Verbose:       false,
+	defaultConfig := MinionConfig{
+		Verbose:       DefaultVerbose,
 		SourceDir:     DefaultSourceDir,
 		TargetDir:     DefaultTargetDir,
 		Force:         DefaultForce,
 		Evenify:       DefaultEvenify,
 		Merge:         DefaultMerge,
 		MergeFileName: DefaultMergeFileName,
+		//		ConfigFileName: DefaultConfigFileName,
+		Language: systemLanguage,
 
-		ConfigFileName: MinionConfigFileName,
-		Language:       systemLanguage,
 		// Use language-specific texts
 		ChapterPrefix:   texts.ChapterPrefix,
 		RunningHeader:   texts.RunningHeader,
@@ -100,36 +100,29 @@ func NewDefaultConfig(systemLanguage language.Tag) *MinionConfig {
 		PersonalTouch: DefaultPersonalTouch,
 		SetFields:     make(map[string]bool),
 	}
+
+	return defaultConfig
+
 }
 
 // MergeWith merges the current config with another config, giving precedence to the other config
-func (c *MinionConfig) MergeWith(other *MinionConfig) error {
-	if other == nil {
-		// don't change c if other is nil
-		return nil
-	}
+//
+//nolint:funlen
+func (c MinionConfig) MergeWith(other MinionConfig) error {
+
 	// handle language separately:
-	// if other language is set, use it for all language-specific fields
-	// and set these fields to language-specific defaults.
+	// if other language is set to a supported language,
+	// set  all language-specific fields  to language-specific defaults.
 	if other.Language.String() != "" {
 		c.Language = other.Language
+		// only if the given language is supported, we set
+		// language-specific values
 		if IsLanguageSupported(other.Language) {
-			texts := DefaultTexts[other.Language]
-			c.ChapterPrefix = texts.ChapterPrefix
-			c.RunningHeader = texts.RunningHeader
-			c.PageNrPrefix = texts.PageNumber
-			c.PageCountPrefix = texts.PageCountPrefix
-			c.BlankPageText = texts.BlankPageText
+			c.setLanguageSpecificValues(other.Language)
 		}
 	}
 
 	// Only override non-zero values
-	if other.ConfigFileName != "" {
-		c.ConfigFileName = other.ConfigFileName
-	}
-	if other.Language != language.Und {
-		c.Language = other.Language
-	}
 	if other.SourceDir != "" {
 		c.SourceDir = other.SourceDir
 	}
@@ -179,4 +172,13 @@ func (c *MinionConfig) MergeWith(other *MinionConfig) error {
 	}
 
 	return nil
+}
+
+func (c MinionConfig) setLanguageSpecificValues(supportedLang language.Tag) {
+	texts := DefaultTexts[supportedLang]
+	c.ChapterPrefix = texts.ChapterPrefix
+	c.RunningHeader = texts.RunningHeader
+	c.PageNrPrefix = texts.PageNumber
+	c.PageCountPrefix = texts.PageCountPrefix
+	c.BlankPageText = texts.BlankPageText
 }

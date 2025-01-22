@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/text/language"
 	"io"
 	"os"
 	"strings"
@@ -11,26 +12,50 @@ import (
 )
 
 // PrintFinalConfiguration prints the final configuration
-func PrintFinalConfiguration(myConfig MinionConfig) {
+func PrintFinalConfiguration(myConfig *MinionConfig) {
 	fmt.Println("Final Configuration:")
-	fmt.Printf("Source directory: %s\n", myConfig.SourceDir)
-	fmt.Printf("Target directory: %s\n", myConfig.TargetDir)
-	fmt.Printf("Force: %t\n", myConfig.Force)
+
+	// Define a helper function to print fields with checks
+	printField := func(name string, value interface{}) {
+		switch v := value.(type) {
+		case string:
+			if v != "" {
+				fmt.Printf("%s: %s\n", name, v)
+			} else {
+				fmt.Printf("%s: <not set>\n", name)
+			}
+		case bool:
+			fmt.Printf("%s: %t\n", name, v)
+		case language.Tag:
+			if v.String() != "" {
+				fmt.Printf("%s: %s\n", name, v)
+			} else {
+				fmt.Printf("%s: <not set>\n", name)
+			}
+		default:
+			fmt.Printf("%s: <unsupported type>\n", name)
+		}
+	}
+
+	// Print all fields using the helper function
+	printField("Source directory", myConfig.SourceDir)
+	printField("Target directory", myConfig.TargetDir)
+	printField("Force", myConfig.Force)
 	fmt.Println(strings.Repeat("=", 20))
-	fmt.Printf("Verbose: %t\n", myConfig.Verbose)
-	fmt.Printf("Evenify: %t\n", myConfig.Evenify)
-	fmt.Printf("Language: %s\n", myConfig.Language)
-	fmt.Printf("Personal-touch: %t\n", myConfig.PersonalTouch)
+	printField("Verbose", myConfig.Verbose)
+	printField("Evenify", myConfig.Evenify)
+	printField("Language", myConfig.Language)
+	printField("Personal-touch", myConfig.PersonalTouch)
 	fmt.Println(strings.Repeat("=", 20))
-	fmt.Printf("Running header: %s\n", myConfig.RunningHeader)
-	fmt.Printf("Chapter prefix: %s\n", myConfig.ChapterPrefix)
-	fmt.Printf("Separator: %s\n", myConfig.Separator)
-	fmt.Printf("Page prefix: %s\n", myConfig.PageNrPrefix)
-	fmt.Printf("Total page count prefix: %s\n", myConfig.PageCountPrefix)
-	fmt.Printf("Blank page text: %s\n", myConfig.BlankPageText)
+	printField("Running header", myConfig.RunningHeader)
+	printField("Chapter prefix", myConfig.ChapterPrefix)
+	printField("Separator", myConfig.Separator)
+	printField("Page prefix", myConfig.PageNrPrefix)
+	printField("Total page count prefix", myConfig.PageCountPrefix)
+	printField("Blank page text", myConfig.BlankPageText)
 	fmt.Println(strings.Repeat("=", 20))
-	fmt.Printf("Merge: %t\n", myConfig.Merge)
-	fmt.Printf("Merge file name: %s\n", myConfig.MergeFileName)
+	printField("Merge", myConfig.Merge)
+	printField("Merge file name", myConfig.MergeFileName)
 }
 
 //
@@ -80,10 +105,10 @@ func coloredWriter(out io.Writer) zerolog.ConsoleWriter {
 			return fmt.Sprintf("%s%s%s", color, i, resetColor)
 		},
 		// Remove log level, timestamp, and fields
-		FormatLevel:      func(i interface{}) string { return "" },
-		FormatFieldName:  func(i interface{}) string { return "" },
-		FormatFieldValue: func(i interface{}) string { return "" },
-		FormatTimestamp:  func(i interface{}) string { return "" }, // Remove the <nil>
+		FormatLevel:      func(_ interface{}) string { return "" },
+		FormatFieldName:  func(_ interface{}) string { return "" },
+		FormatFieldValue: func(_ interface{}) string { return "" },
+		FormatTimestamp:  func(_ interface{}) string { return "" }, // Remove the <nil>
 		NoColor:          false,
 	}
 }

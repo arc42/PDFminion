@@ -4,7 +4,7 @@ Date: 2024-12-16
 
 ## Status
 
-Accepted
+Accepted but partially postponed (see ADR-0011)
 
 ## Context
 
