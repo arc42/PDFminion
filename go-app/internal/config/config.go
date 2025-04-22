@@ -3,10 +3,34 @@ package config
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/text/language"
 	"pdfminion/internal/domain"
 )
+
+// FlagChecker provides an interface for checking if flags have been set
+type FlagChecker interface {
+	HasBeenProvided(flagName string) bool
+}
+
+// CobraFlagChecker implements FlagChecker using Cobra commands
+type CobraFlagChecker struct {
+	cmd *cobra.Command
+}
+
+func NewCobraFlagChecker(cmd *cobra.Command) *CobraFlagChecker {
+	return &CobraFlagChecker{cmd: cmd}
+}
+
+func (c *CobraFlagChecker) HasBeenProvided(flagName string) bool {
+	flag := c.cmd.Flags().Lookup(flagName)
+	if flag == nil {
+		log.Warn().Msgf("Flag %s not found", flagName)
+		return false
+	}
+	return flag.Changed
+}
 
 // ConfigureApplication collects configuration from all sources and merges them
 // Priority order:
@@ -16,11 +40,10 @@ import (
 // .   2b: $HOME/<filename>.yaml if --config filename is given
 // 3. local directory config file (if exists),
 // 4. (highest priority) command line flags
-//
 // In steps 2-4 we need to consider "unset" boolean values: If a boolean value is not set in the
 // configuration (file or flag), it must not override the previously set value.
 // Therefore, we introduced metadata ("SetFields") to ActiveMinionConfig.
-func ConfigureApplication(verbose bool) (domain.MinionConfig, error) {
+func ConfigureApplication(verbose bool, flagChecker FlagChecker) (domain.MinionConfig, error) {
 
 	if verbose {
 		fmt.Println("starting to configure  application")
@@ -51,7 +74,7 @@ func ConfigureApplication(verbose bool) (domain.MinionConfig, error) {
 		}
 	*/
 	// 4. Command line flags (with the exception of --language)
-	flagConfig := loadFlagConfig()
+	flagConfig := loadFlagConfig(flagChecker)
 
 	// Merge configurations in priority order
 
@@ -92,7 +115,7 @@ func loadDefaultConfig() domain.MinionConfig {
 }
 
 // loadFlagConfig loads the configuration from command line flags
-func loadFlagConfig() domain.MinionConfig {
+func loadFlagConfig(flagChecker FlagChecker) domain.MinionConfig {
 	log.Debug().Msg("loading flag configuration")
 
 	// initialize local fconfig with empty metadata SetFields
@@ -101,11 +124,11 @@ func loadFlagConfig() domain.MinionConfig {
 	}
 
 	// to avoid the too-long-function linter error, we split the flag loading
-	loadFlagProcessingConfig(fconfig)
+	loadFlagProcessingConfig(fconfig, flagChecker)
 
-	loadFlagTextOnPageConfig(fconfig)
+	loadFlagTextOnPageConfig(fconfig, flagChecker)
 
-	if flagHasBeenProvided("personal") {
+	if flagChecker.HasBeenProvided("personal") {
 		fconfig.PersonalTouch = viper.GetBool("personal")
 		fconfig.SetFields["personal"] = true
 	}
@@ -114,71 +137,61 @@ func loadFlagConfig() domain.MinionConfig {
 
 }
 
-func loadFlagTextOnPageConfig(fconfig domain.MinionConfig) {
-	if flagHasBeenProvided("language") {
+func loadFlagTextOnPageConfig(fconfig domain.MinionConfig, flagChecker FlagChecker) {
+	if flagChecker.HasBeenProvided("language") {
 		fconfig.Language = domain.ParseLanguageCode(viper.GetString("language"))
 		fconfig.SetFields["language"] = true
 	}
-	if flagHasBeenProvided("running-header") {
+	if flagChecker.HasBeenProvided("running-header") {
 		fconfig.RunningHeader = viper.GetString("running-header")
 		fconfig.SetFields["runningheader"] = true
 	}
-	if flagHasBeenProvided("chapter-prefix") {
+	if flagChecker.HasBeenProvided("chapter-prefix") {
 		fconfig.ChapterPrefix = viper.GetString("chapter-prefix")
 		fconfig.SetFields["chapterprefix"] = true
 	}
-	if flagHasBeenProvided("separator") {
+	if flagChecker.HasBeenProvided("separator") {
 		fconfig.Separator = viper.GetString("separator")
 		fconfig.SetFields["separator"] = true
 	}
-	if flagHasBeenProvided("page-prefix") {
+	if flagChecker.HasBeenProvided("page-prefix") {
 		fconfig.PageNrPrefix = viper.GetString("page-prefix")
 		fconfig.SetFields["pageprefix"] = true
 	}
-	if flagHasBeenProvided("page-count-prefix") {
+	if flagChecker.HasBeenProvided("page-count-prefix") {
 		fconfig.PageCountPrefix = viper.GetString("page-count-prefix")
 		fconfig.SetFields["pagecountprefix"] = true
 	}
-	if flagHasBeenProvided("blank-page-text") {
+	if flagChecker.HasBeenProvided("blank-page-text") {
 		fconfig.BlankPageText = viper.GetString("blank-page-text")
 		fconfig.SetFields["blankpagetext"] = true
 	}
 }
 
-func loadFlagProcessingConfig(fconfig domain.MinionConfig) {
-	if flagHasBeenProvided("verbose") {
+func loadFlagProcessingConfig(fconfig domain.MinionConfig, flagChecker FlagChecker) {
+	if flagChecker.HasBeenProvided("verbose") {
 		fconfig.Verbose = viper.GetBool("verbose")
 		fconfig.SetFields["verbose"] = true
 	}
-	if flagHasBeenProvided("source") {
+	if flagChecker.HasBeenProvided("source") {
 		fconfig.SourceDir = viper.GetString("source")
 		fconfig.SetFields["sourcedir"] = true
 	}
-	if flagHasBeenProvided("target") {
+	if flagChecker.HasBeenProvided("target") {
 		fconfig.TargetDir = viper.GetString("target")
 		fconfig.SetFields["targetdir"] = true
 	}
-	if flagHasBeenProvided("force") {
+	if flagChecker.HasBeenProvided("force") {
 		fconfig.Force = viper.GetBool("force")
 		fconfig.SetFields["force"] = true
 	}
-	if flagHasBeenProvided("evenify") {
+	if flagChecker.HasBeenProvided("evenify") {
 		fconfig.Evenify = viper.GetBool("evenify")
 		fconfig.SetFields["evenify"] = true
 	}
-	if flagHasBeenProvided("merge") {
+	if flagChecker.HasBeenProvided("merge") {
 		fconfig.Merge = true
 		fconfig.MergeFileName = viper.GetString("merge")
 		fconfig.SetFields["merge"] = true
 	}
-}
-
-// flagHasBeenProvided checks if a flag has been explicitly provided on the command line
-func flagHasBeenProvided(flagName string) bool {
-	flag := rootCmd.Flags().Lookup(flagName)
-	if flag == nil {
-		log.Warn().Msgf("Flag %s not found", flagName)
-		return false
-	}
-	return flag.Changed
 }

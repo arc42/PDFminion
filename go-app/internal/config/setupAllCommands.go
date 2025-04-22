@@ -18,7 +18,11 @@ var (
 		Use:   "pdfminion",
 		Short: "PDFMinion adds page numbers to PDF files with custom options",
 		Long:  "PDFMinion is a CLI tool to add page numbers to existing PDF files with customizable options like chapter numbers, running headers, and more",
-		RunE:  runPDFProcessing,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return nil
+		},
+		// Add RunE to the root command to handle PDF processing by default
+		RunE: runPDFProcessing,
 	}
 
 	ActiveMinionConfig domain.MinionConfig
@@ -32,10 +36,27 @@ func SetupApplication(appVersion string) *cobra.Command {
 	// Set application version
 	domain.SetAppVersion(appVersion)
 
+	// Add version flag to persistent flags (must be done before setupFlags)
+	rootCmd.PersistentFlags().BoolP("version", "V", false, "Print version information and exit")
+
+	// Add a pre-run hook that will be executed before any command
+	originalPreRunE := rootCmd.PersistentPreRunE
+	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		// Check for version flag first
+		versionFlag, _ := cmd.Flags().GetBool("version")
+		if versionFlag {
+			domain.PrintVersion()
+			os.Exit(0)
+		}
+
+		// Call original pre-run if it exists
+		if originalPreRunE != nil {
+			return originalPreRunE(cmd, args)
+		}
+		return nil
+	}
+
 	// Setup flags, as some commands need the flags prior to execution
-	// Examples:
-	// --verbose determines kind of output
-	// --language determines several default settings
 	setupFlags()
 
 	// check if verbose is set
@@ -45,17 +66,21 @@ func SetupApplication(appVersion string) *cobra.Command {
 	if verbose {
 		fmt.Printf("verbose mode requested.")
 	}
-	// with the flags, we can configure the application
+	// Setup commands for the root CLI application
+	setupCommands()
+
+	// Create a flag checker for configuration
+	flagChecker := NewCobraFlagChecker(rootCmd)
+
+	// Now that commands are set up, we can configure the application
 	// using our layered approach, see ADR-0008
-	ActiveMinionConfig, err := ConfigureApplication(verbose)
+	var err error
+	ActiveMinionConfig, err = ConfigureApplication(verbose, flagChecker)
 	if err != nil {
 		log.Error().Err(err).Msg("Error loading configuration")
 		os.Exit(1)
 	}
 	log.Debug().Interface("configuration:", ActiveMinionConfig).Msg("Configuration completed ")
-
-	// Setup commands for the root CLI application
-	setupCommands()
 
 	return rootCmd
 }
@@ -79,7 +104,7 @@ func setupFlags() {
 	rootCmd.Flags().String("separator", domain.DefaultSeparator, "Separator between chapter and page")
 	rootCmd.Flags().String("page-count-prefix", domain.DefaultPageCountPrefix, "Prefix for total page count")
 
-	// Bind all flags to viper
+	// Bind all flags to viper - ensure this includes persistent flags too
 	if err := viper.BindPFlags(rootCmd.PersistentFlags()); err != nil {
 		log.Fatal().Err(err).Msg("Failed to bind persistent flags to viper")
 	}

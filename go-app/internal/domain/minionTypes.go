@@ -65,6 +65,11 @@ type MinionConfig struct {
 	SetFields map[string]bool
 }
 
+// NewDefaultEnglishConfig creates a new configuration with English texts
+func NewDefaultEnglishConfig() MinionConfig {
+	return NewDefaultConfig(language.English)
+}
+
 // NewDefaultConfig creates a new configuration with default values,
 // using the system language for texts
 func NewDefaultConfig(systemLanguage language.Tag) MinionConfig {
@@ -108,7 +113,15 @@ func NewDefaultConfig(systemLanguage language.Tag) MinionConfig {
 // MergeWith merges the current config with another config, giving precedence to the other config
 //
 //nolint:funlen
-func (c MinionConfig) MergeWith(other MinionConfig) error {
+func (c *MinionConfig) MergeWith(other MinionConfig) error {
+	// Ensure SetFields is initialized
+	// to avoid nil pointer dereferences which would lead to panics
+	if c.SetFields == nil {
+		c.SetFields = make(map[string]bool)
+	}
+	if other.SetFields == nil {
+		other.SetFields = make(map[string]bool)
+	}
 
 	// handle language separately:
 	// if other language is set to a supported language,
@@ -174,7 +187,7 @@ func (c MinionConfig) MergeWith(other MinionConfig) error {
 	return nil
 }
 
-func (c MinionConfig) setLanguageSpecificValues(supportedLang language.Tag) {
+func (c *MinionConfig) setLanguageSpecificValues(supportedLang language.Tag) {
 	texts := DefaultTexts[supportedLang]
 	c.ChapterPrefix = texts.ChapterPrefix
 	c.RunningHeader = texts.RunningHeader

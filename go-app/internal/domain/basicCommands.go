@@ -13,7 +13,12 @@ import (
 
 // PrintFinalConfiguration prints the final configuration
 func PrintFinalConfiguration(myConfig *MinionConfig) {
-	fmt.Println("Final Configuration:")
+	fmt.Println("Your Current PDFMinion Configuration:")
+
+	if myConfig == nil {
+		fmt.Println("Configuration is nil!")
+		return
+	}
 
 	// Define a helper function to print fields with checks
 	printField := func(name string, value interface{}) {
@@ -28,7 +33,8 @@ func PrintFinalConfiguration(myConfig *MinionConfig) {
 			fmt.Printf("%s: %t\n", name, v)
 		case language.Tag:
 			if v.String() != "" {
-				fmt.Printf("%s: %s\n", name, v)
+				// Print language tag in a format the test expects
+				fmt.Printf("%s: %s\n", name, v.String())
 			} else {
 				fmt.Printf("%s: <not set>\n", name)
 			}
