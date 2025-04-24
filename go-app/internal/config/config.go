@@ -24,12 +24,38 @@ func NewCobraFlagChecker(cmd *cobra.Command) *CobraFlagChecker {
 }
 
 func (c *CobraFlagChecker) HasBeenProvided(flagName string) bool {
+	// First check the provided command
 	flag := c.cmd.Flags().Lookup(flagName)
-	if flag == nil {
-		log.Warn().Msgf("Flag %s not found", flagName)
-		return false
+	if flag != nil && flag.Changed {
+		return true
 	}
-	return flag.Changed
+
+	// Then check persistent flags
+	flag = c.cmd.PersistentFlags().Lookup(flagName)
+	if flag != nil && flag.Changed {
+		return true
+	}
+
+	// Check parent commands recursively
+	parentCmd := c.cmd.Parent()
+	for parentCmd != nil {
+		// Check local flags of parent
+		flag = parentCmd.Flags().Lookup(flagName)
+		if flag != nil && flag.Changed {
+			return true
+		}
+
+		// Check persistent flags of parent
+		flag = parentCmd.PersistentFlags().Lookup(flagName)
+		if flag != nil && flag.Changed {
+			return true
+		}
+
+		parentCmd = parentCmd.Parent()
+	}
+
+	// Don't log warnings - this is expected behavior
+	return false
 }
 
 // ConfigureApplication collects configuration from all sources and merges them

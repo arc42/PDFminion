@@ -215,6 +215,7 @@ readability, and prominence, aligning with classic book design practices.
 <div markdown="1" class="left-aligned-section">
 * **Commands** are executed immediately. They are given without `--`, for example `pdfminion version`
 * Only the first command will be executed at a time.
+* The settings command will accept flags. 
 * **Flags** (_configuration settings_) control the behaviour of the actual processing. They are given with `--`, for example `pdfminion --force` or `pdfminion --source ./input`
 * Configurations (_flags_) can also be set via a configuration file, either in users' home directory or in the current working directory.
     The default name is `pdfminion.yaml` or `pdfminion.yml`. Other names can be specified with the `--config` flag.
@@ -227,7 +228,7 @@ readability, and prominence, aligning with classic book design practices.
 | **Help**          | `help`      | `?`| Displays a list of supported commands and their usage.<br>Example: `pdfminion --help`|
 | **List Languages**| `list-languages` | `ll`, `list`   | Lists available languages for the `--language` option.<br>Example: `pdfminion list-languages` |
 | **Settings**      | `settings`  |         | Prints all current settings, like page-prefix, chapter-prefix etc. <br>Example: `pdfminion settings` |
-| **Version**       | `version`   |     | Displays the current version of PDFminion.<br>Example: `pdfminion version` |
+| **Version**       | `version`   |     | Displays the current version of PDFminion.<br>Example: `pdfminion version`. Can also be invoked as a flag. |
 | **Credits**       | `credits`   |         | Gives credit to the maintainers of several OS libraries. <br>Example: `pdfminion credits`  |
 
 If no command is given, all flags are evaluate, validated and PDF processing is started.
@@ -243,7 +244,6 @@ If no command is given, all flags are evaluate, validated and PDF processing is 
 <!-- see ADR-0011, config files have been postponed
 | **Config File**  | `--config <filename>`  | `-c <filename>` | Loads configuration from a file. It needs to be a yaml file. Example: `pdfminion --config settings.yaml`  |
 -->
-| **Verbose Mode**    | `--verbose`     |                | Gives detailed processing output. Default: `false`. Example: `pdfminion --verbose` |
 
 
 <h2>Page Related Settings</h2>
