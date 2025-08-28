@@ -18,7 +18,10 @@ var (
 		Use:   "pdfminion",
 		Short: "PDFMinion adds page numbers to PDF files with custom options",
 		Long:  "PDFMinion is a CLI tool to add page numbers to existing PDF files with customizable options like chapter numbers, running headers, and more",
-		RunE:  runPDFProcessing,
+		// When no subcommand is provided, process PDFs with the given flags
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runPDFProcessing(cmd, args)
+		},
 	}
 
 	ActiveMinionConfig domain.MinionConfig
@@ -45,39 +48,45 @@ func SetupApplication(appVersion string) *cobra.Command {
 	if verbose {
 		fmt.Printf("verbose mode requested.")
 	}
-	// with the flags, we can configure the application
+	// Setup commands for the root CLI application
+	setupCommands()
+
+	// Create a flag checker for configuration
+	flagChecker := NewCobraFlagChecker(rootCmd)
+
+	// Now that commands are set up, we can configure the application
 	// using our layered approach, see ADR-0008
-	ActiveMinionConfig, err := ConfigureApplication(verbose)
+	var err error
+	ActiveMinionConfig, err = ConfigureApplication(verbose, flagChecker)
 	if err != nil {
 		log.Error().Err(err).Msg("Error loading configuration")
 		os.Exit(1)
 	}
 	log.Debug().Interface("configuration:", ActiveMinionConfig).Msg("Configuration completed ")
 
-	// Setup commands for the root CLI application
-	setupCommands()
-
 	return rootCmd
 }
 
 func setupFlags() {
 	// Persistent flags (available to all commands)
-	rootCmd.Flags().StringP("language", "l", "", "Override system language")
+	rootCmd.PersistentFlags().StringP("language", "l", "", "Override system language")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Give more detailed output during processing")
+	rootCmd.PersistentFlags().StringP("config", "c", "", "Path to configuration file")
 
 	// Local flags (only for PDF processing)
 	rootCmd.Flags().StringP("source", "s", domain.DefaultSourceDir, "Source directory for PDF files")
 	rootCmd.Flags().StringP("target", "t", domain.DefaultTargetDir, "Target directory for processed files")
 	rootCmd.Flags().BoolP("force", "f", false, "Force overwrite of target directory")
 	rootCmd.Flags().BoolP("evenify", "e", true, "Ensure even page count in output")
-	rootCmd.Flags().BoolP("verbose", "v", false, "Give more detailed output during processing")
 	rootCmd.Flags().StringP("running-header", "r", "", "Text for running header")
-	rootCmd.Flags().StringP("chapter-prefix", "c", domain.DefaultChapterPrefix, "Prefix for chapter numbers")
+	rootCmd.Flags().String("chapter-prefix", domain.DefaultChapterPrefix, "Prefix for chapter numbers")
 	rootCmd.Flags().StringP("page-prefix", "p", domain.DefaultPageNrPrefix, "Prefix for page numbers")
 	rootCmd.Flags().StringP("blank-page-text", "b", domain.DefaultBlankPageText, "Text for blank pages")
 	rootCmd.Flags().Bool("personal", false, "Adds a personal touch (aka logo) to random pages")
 	rootCmd.Flags().String("merge", "merged.pdf", "--merge=filename, merge generated files into <filename>")
 	rootCmd.Flags().String("separator", domain.DefaultSeparator, "Separator between chapter and page")
 	rootCmd.Flags().String("page-count-prefix", domain.DefaultPageCountPrefix, "Prefix for total page count")
+	rootCmd.Flags().BoolP("toc", "o", false, "Generate table of contents")
 
 	// Bind all flags to viper
 	if err := viper.BindPFlags(rootCmd.PersistentFlags()); err != nil {

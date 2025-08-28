@@ -57,7 +57,7 @@ func TestDefaultConfigMergeWithFlagGerman(t *testing.T) {
 	}
 
 	// can merge without error
-	assert.NoError(t, base.MergeWith(german), "MergeWith should not return an error")
+	assert.NoError(t, base.MergeWith(*german), "MergeWith should not return an error")
 
 	// the language specific values should be set to the German values
 	// the language specific values should be set to the German values
@@ -72,7 +72,7 @@ func TestDefaultConfigMergeWithFlagGerman(t *testing.T) {
 func TestDefaultConfigMergeWithFlagFrench(t *testing.T) {
 	base := NewDefaultConfig(language.English)
 
-	french := &MinionConfig{
+	french := MinionConfig{
 		Language:  language.French,
 		SetFields: map[string]bool{"language": true},
 	}
@@ -94,7 +94,7 @@ func TestDefaultConfigMergeWithFlagGermanAndOverride(t *testing.T) {
 	const newPagePrefix = "S."
 	const newChapterPrefix = "Kap."
 
-	germanWithOverride := &MinionConfig{
+	germanWithOverride := MinionConfig{
 		Language:      language.German,
 		PageNrPrefix:  newPagePrefix,
 		ChapterPrefix: newChapterPrefix,
@@ -130,8 +130,8 @@ func TestDefaultConfigMergeWithFlagGermanAndOverrideBlankPageText(t *testing.T) 
 		SetFields:     map[string]bool{"language": true}}
 
 	// can merge without error
-	assert.NoError(t, base.MergeWith(germanWithOverride), "MergeWith should not return an error")
-	
+	assert.NoError(t, base.MergeWith(*germanWithOverride), "MergeWith should not return an error")
+
 	// the overridden values should be set to the new values
 	assert.Equal(t, newBlankPageText, base.BlankPageText)
 
@@ -151,7 +151,7 @@ func TestDefaultCanOverrideSource(t *testing.T) {
 		SetFields: map[string]bool{"source": true},
 	}
 
-	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.NoError(t, defaultConfig.MergeWith(*other), "MergeWith should not return an error")
 	assert.Equal(t, "/new/source", defaultConfig.SourceDir)
 }
 
@@ -165,7 +165,7 @@ func TestDefaultCanOverrideTarget(t *testing.T) {
 		TargetDir: newTargetDir,
 		SetFields: map[string]bool{"target": true},
 	}
-	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.NoError(t, defaultConfig.MergeWith(*other), "MergeWith should not return an error")
 	assert.Equal(t, newTargetDir, defaultConfig.TargetDir)
 }
 
@@ -178,7 +178,7 @@ func TestDefaultCanOverrideChapterPrefix(t *testing.T) {
 		ChapterPrefix: newChapterPrefix,
 	}
 
-	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.NoError(t, defaultConfig.MergeWith(*other), "MergeWith should not return an error")
 	assert.Equal(t, newChapterPrefix, defaultConfig.ChapterPrefix)
 }
 
@@ -192,7 +192,7 @@ func TestDefaultCanOverridePageNrPrefix(t *testing.T) {
 		PageNrPrefix: newPageNrPrefix,
 	}
 
-	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.NoError(t, defaultConfig.MergeWith(*other), "MergeWith should not return an error")
 	assert.Equal(t, newPageNrPrefix, defaultConfig.PageNrPrefix)
 }
 
@@ -206,7 +206,7 @@ func TestDefaultCanOverridePageCountPrefix(t *testing.T) {
 		PageCountPrefix: newPageCountPrefix,
 	}
 
-	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.NoError(t, defaultConfig.MergeWith(*other), "MergeWith should not return an error")
 	assert.Equal(t, newPageCountPrefix, defaultConfig.PageCountPrefix)
 }
 
@@ -221,7 +221,7 @@ func TestDefaultCanOverrideBlankPageText(t *testing.T) {
 		BlankPageText: newBlankPageText,
 	}
 
-	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.NoError(t, defaultConfig.MergeWith(*other), "MergeWith should not return an error")
 	assert.Equal(t, newBlankPageText, defaultConfig.BlankPageText)
 }
 
@@ -235,7 +235,7 @@ func TestDefaultCanOverrideSeparator(t *testing.T) {
 		Separator: newSeparator,
 	}
 
-	assert.NoError(t, defaultConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.NoError(t, defaultConfig.MergeWith(*other), "MergeWith should not return an error")
 	assert.Equal(t, newSeparator, defaultConfig.Separator)
 }
 
@@ -245,7 +245,7 @@ func TestMinionConfig_MergeWithMinimal(t *testing.T) {
 		SourceDir: "/new/source",
 		SetFields: map[string]bool{"source": true},
 	}
-	assert.NoError(t, minimalBaseConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.NoError(t, minimalBaseConfig.MergeWith(*other), "MergeWith should not return an error")
 	assert.Equal(t, "/new/source", minimalBaseConfig.SourceDir)
 }
 
@@ -260,7 +260,7 @@ func TestMinionConfig_MergeMiniWithEmpty(t *testing.T) {
 		SetFields: map[string]bool{},
 	}
 
-	assert.NoError(t, minimalBaseConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.NoError(t, minimalBaseConfig.MergeWith(*other), "MergeWith should not return an error")
 	assert.Equal(t, "/original/source", minimalBaseConfig.SourceDir)
 	assert.Equal(t, "/original/target", minimalBaseConfig.TargetDir)
 	assert.Equal(t, true, minimalBaseConfig.Verbose)
@@ -280,7 +280,7 @@ func TestMinionConfig_MergeBooleanOverwrite(t *testing.T) {
 		SetFields: map[string]bool{"verbose": true, "force": true},
 	}
 
-	assert.NoError(t, minimalBaseConfig.MergeWith(other), "MergeWith should not return an error")
+	assert.NoError(t, minimalBaseConfig.MergeWith(*other), "MergeWith should not return an error")
 	assert.Equal(t, false, minimalBaseConfig.Verbose)
 	assert.Equal(t, true, minimalBaseConfig.Force)
 }
@@ -314,7 +314,7 @@ func TestMinionConfig_MergeWithPartialSuperset(t *testing.T) {
 		},
 	}
 
-	assert.NoError(t, base.MergeWith(other), "MergeWith should not return an error")
+	assert.NoError(t, base.MergeWith(*other), "MergeWith should not return an error")
 
 	assert.Equal(t, language.German, base.Language, "Language should have been overwritten and set to German")
 	assert.Equal(t, true, base.Verbose, "Verbose should have been overwritten and set to true")
@@ -345,7 +345,7 @@ func TestMinionConfig_MergeWithSubset(t *testing.T) {
 		},
 	}
 
-	assert.NoError(t, base.MergeWith(other), "MergeWith should not return an error")
+	assert.NoError(t, base.MergeWith(*other), "MergeWith should not return an error")
 
 	assert.Equal(t, true, base.Verbose, "Verbose should have been overwritten and set to true")
 	assert.Equal(t, "/new/source", base.SourceDir, "SourceDir should have been overwritten and set to /new/source")
@@ -365,6 +365,6 @@ func TestMinionConfig_MergeWithKnownOtherLanguage(t *testing.T) {
 		},
 	}
 
-	assert.NoError(t, base.MergeWith(other), "MergeWith should not return an error")
+	assert.NoError(t, base.MergeWith(*other), "MergeWith should not return an error")
 
 }

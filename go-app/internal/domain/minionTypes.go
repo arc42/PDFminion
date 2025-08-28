@@ -20,6 +20,7 @@ const (
 	DefaultSeparator       = " - "
 	DefaultSourceDir       = "_pdfs"
 	DefaultTargetDir       = "_target"
+	DefaultTOC             = false
 	DefaultVerbose         = false
 )
 
@@ -46,6 +47,7 @@ type MinionConfig struct {
 	Evenify       bool
 	Merge         bool
 	MergeFileName string
+	TOC           bool // Table of Contents generation
 
 	// Page formatting
 	RunningHeader   string
@@ -63,6 +65,11 @@ type MinionConfig struct {
 	// This is used to determine which fields to merge
 	// Note: keys are lowercase, should be converted with strings.ToLower()
 	SetFields map[string]bool
+}
+
+// NewDefaultEnglishConfig creates a new configuration with English texts
+func NewDefaultEnglishConfig() MinionConfig {
+	return NewDefaultConfig(language.English)
 }
 
 // NewDefaultConfig creates a new configuration with default values,
@@ -86,6 +93,7 @@ func NewDefaultConfig(systemLanguage language.Tag) MinionConfig {
 		Evenify:       DefaultEvenify,
 		Merge:         DefaultMerge,
 		MergeFileName: DefaultMergeFileName,
+		TOC:           DefaultTOC,
 		//		ConfigFileName: DefaultConfigFileName,
 		Language: systemLanguage,
 
@@ -108,7 +116,15 @@ func NewDefaultConfig(systemLanguage language.Tag) MinionConfig {
 // MergeWith merges the current config with another config, giving precedence to the other config
 //
 //nolint:funlen
-func (c MinionConfig) MergeWith(other MinionConfig) error {
+func (c *MinionConfig) MergeWith(other MinionConfig) error {
+	// Ensure SetFields is initialized
+	// to avoid nil pointer dereferences which would lead to panics
+	if c.SetFields == nil {
+		c.SetFields = make(map[string]bool)
+	}
+	if other.SetFields == nil {
+		other.SetFields = make(map[string]bool)
+	}
 
 	// handle language separately:
 	// if other language is set to a supported language,
@@ -170,11 +186,14 @@ func (c MinionConfig) MergeWith(other MinionConfig) error {
 	if other.SetFields["personal"] {
 		c.PersonalTouch = other.PersonalTouch
 	}
+	if other.SetFields["toc"] {
+		c.TOC = other.TOC
+	}
 
 	return nil
 }
 
-func (c MinionConfig) setLanguageSpecificValues(supportedLang language.Tag) {
+func (c *MinionConfig) setLanguageSpecificValues(supportedLang language.Tag) {
 	texts := DefaultTexts[supportedLang]
 	c.ChapterPrefix = texts.ChapterPrefix
 	c.RunningHeader = texts.RunningHeader

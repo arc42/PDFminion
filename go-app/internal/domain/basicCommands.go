@@ -13,7 +13,12 @@ import (
 
 // PrintFinalConfiguration prints the final configuration
 func PrintFinalConfiguration(myConfig *MinionConfig) {
-	fmt.Println("Final Configuration:")
+	fmt.Println("Your Current PDFMinion Configuration:")
+
+	if myConfig == nil {
+		fmt.Println("Configuration is nil!")
+		return
+	}
 
 	// Define a helper function to print fields with checks
 	printField := func(name string, value interface{}) {
@@ -46,6 +51,7 @@ func PrintFinalConfiguration(myConfig *MinionConfig) {
 	printField("Evenify", myConfig.Evenify)
 	printField("Language", myConfig.Language)
 	printField("Personal-touch", myConfig.PersonalTouch)
+	printField("Table of Contents", myConfig.TOC)
 	fmt.Println(strings.Repeat("=", 20))
 	printField("Running header", myConfig.RunningHeader)
 	printField("Chapter prefix", myConfig.ChapterPrefix)
