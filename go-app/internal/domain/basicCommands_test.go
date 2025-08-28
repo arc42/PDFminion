@@ -79,7 +79,6 @@ func TestPrintFinalConfigurationWithOtherLanguage(t *testing.T) {
 	}
 	// Test the output for standard source directory
 
-	// Update the assertion to look for the string representation of the language tag
-	// instead of the raw language.Tag object
-	assert.Contains(t, output, "Language: is", "expected output to contain 'is'")
+	// Test the output for standard source directory
+	assert.Contains(t, output, otherLanguage, "expected output to contain '%s'", otherLanguage)
 }

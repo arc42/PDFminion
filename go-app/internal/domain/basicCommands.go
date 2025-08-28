@@ -52,6 +52,7 @@ func PrintFinalConfiguration(myConfig *MinionConfig) {
 	printField("Evenify", myConfig.Evenify)
 	printField("Language", myConfig.Language)
 	printField("Personal-touch", myConfig.PersonalTouch)
+	printField("Table of Contents", myConfig.TOC)
 	fmt.Println(strings.Repeat("=", 20))
 	printField("Running header", myConfig.RunningHeader)
 	printField("Chapter prefix", myConfig.ChapterPrefix)

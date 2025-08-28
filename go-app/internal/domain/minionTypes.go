@@ -20,6 +20,7 @@ const (
 	DefaultSeparator       = " - "
 	DefaultSourceDir       = "_pdfs"
 	DefaultTargetDir       = "_target"
+	DefaultTOC             = false
 	DefaultVerbose         = false
 )
 
@@ -46,6 +47,7 @@ type MinionConfig struct {
 	Evenify       bool
 	Merge         bool
 	MergeFileName string
+	TOC           bool // Table of Contents generation
 
 	// Page formatting
 	RunningHeader   string
@@ -91,6 +93,7 @@ func NewDefaultConfig(systemLanguage language.Tag) MinionConfig {
 		Evenify:       DefaultEvenify,
 		Merge:         DefaultMerge,
 		MergeFileName: DefaultMergeFileName,
+		TOC:           DefaultTOC,
 		//		ConfigFileName: DefaultConfigFileName,
 		Language: systemLanguage,
 
@@ -182,6 +185,9 @@ func (c *MinionConfig) MergeWith(other MinionConfig) error {
 	}
 	if other.SetFields["personal"] {
 		c.PersonalTouch = other.PersonalTouch
+	}
+	if other.SetFields["toc"] {
+		c.TOC = other.TOC
 	}
 
 	return nil
