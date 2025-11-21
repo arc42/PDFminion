@@ -17,7 +17,6 @@
 .DS_Store
 go-app/_target
 go-app/_pdfs
-pdfminion
 docs/_site
 go-app/build
 *.bkp
