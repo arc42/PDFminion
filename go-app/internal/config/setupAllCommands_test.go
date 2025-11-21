@@ -34,8 +34,7 @@ func TestSetupFlags(t *testing.T) {
 	assert.False(t, viper.GetBool("evenify"))
 
 	// Verify the MinionConfig
-	flagChecker := config.NewCobraFlagChecker(rootCmd)
-	minionConfig, err := config.ConfigureApplication(false, flagChecker)
+	minionConfig, err := config.ConfigureApplication(false, rootCmd)
 	assert.NoError(t, err, "Failed to configure application")
 
 	assert.Equal(t, domain.ParseLanguageCode("EN"), minionConfig.Language)
@@ -50,10 +49,10 @@ func TestSetupFlags(t *testing.T) {
 func TestFlagLoadingIntegration(t *testing.T) {
 	// Test various flags to ensure they're properly loaded
 	testCases := []struct {
-		name          string
-		args          []string
-		checkConfig   func(*testing.T, domain.MinionConfig)
-		description   string
+		name        string
+		args        []string
+		checkConfig func(*testing.T, domain.MinionConfig)
+		description string
 	}{
 		{
 			name: "text_formatting_flags",
@@ -137,8 +136,7 @@ func TestFlagLoadingIntegration(t *testing.T) {
 			assert.NoError(t, err, "Failed to execute command with args: %v", tc.args)
 
 			// Get the configuration
-			flagChecker := config.NewCobraFlagChecker(rootCmd)
-			minionConfig, err := config.ConfigureApplication(false, flagChecker)
+			minionConfig, err := config.ConfigureApplication(false, rootCmd)
 			assert.NoError(t, err, "Failed to configure application")
 
 			// Run test-specific checks

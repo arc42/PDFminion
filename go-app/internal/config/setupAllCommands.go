@@ -51,13 +51,10 @@ func SetupApplication(appVersion string) *cobra.Command {
 	// Setup commands for the root CLI application
 	setupCommands()
 
-	// Create a flag checker for configuration
-	flagChecker := NewCobraFlagChecker(rootCmd)
-
 	// Now that commands are set up, we can configure the application
 	// using our layered approach, see ADR-0008
 	var err error
-	ActiveMinionConfig, err = ConfigureApplication(verbose, flagChecker)
+	ActiveMinionConfig, err = ConfigureApplication(verbose, rootCmd)
 	if err != nil {
 		log.Error().Err(err).Msg("Error loading configuration")
 		os.Exit(1)
