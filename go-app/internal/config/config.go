@@ -116,9 +116,9 @@ func loadFlagConfig(flagChecker FlagChecker) domain.MinionConfig {
 	}
 
 	// to avoid the too-long-function linter error, we split the flag loading
-	loadFlagProcessingConfig(fconfig, flagChecker)
+	loadFlagProcessingConfig(&fconfig, flagChecker)
 
-	loadFlagTextOnPageConfig(fconfig, flagChecker)
+	loadFlagTextOnPageConfig(&fconfig, flagChecker)
 
 	if flagChecker.HasBeenProvided("personal") {
 		fconfig.PersonalTouch = viper.GetBool("personal")
@@ -129,7 +129,7 @@ func loadFlagConfig(flagChecker FlagChecker) domain.MinionConfig {
 
 }
 
-func loadFlagTextOnPageConfig(fconfig domain.MinionConfig, flagChecker FlagChecker) {
+func loadFlagTextOnPageConfig(fconfig *domain.MinionConfig, flagChecker FlagChecker) {
 	if flagChecker.HasBeenProvided("language") {
 		fconfig.Language = domain.ParseLanguageCode(viper.GetString("language"))
 		fconfig.SetFields["language"] = true
@@ -262,7 +262,7 @@ func loadConfigFile(configFile string, verbose bool) (domain.MinionConfig, error
 	return config, nil
 }
 
-func loadFlagProcessingConfig(fconfig domain.MinionConfig, flagChecker FlagChecker) {
+func loadFlagProcessingConfig(fconfig *domain.MinionConfig, flagChecker FlagChecker) {
 	if flagChecker.HasBeenProvided("verbose") {
 		fconfig.Verbose = viper.GetBool("verbose")
 		fconfig.SetFields["verbose"] = true

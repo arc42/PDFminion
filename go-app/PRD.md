@@ -102,16 +102,18 @@ If no command is given, all flags are evaluate, validated and PDF processing is 
 
 ### 5.3 Flags for Basic Settings
 
+> **Note on Shorthand Flags**: Shorthand flags are designed to avoid conflicts. For example, `-c` is reserved for `--config` (following common CLI conventions like gcc, ssh, rsync), so `--chapter-prefix` does not have a shorthand. Similarly, `-v` is used for `--verbose` rather than version, as version is typically invoked as a command (`pdfminion version`) rather than a flag.
+
 | **Name**  | **Long Name**  | **Shorthand** | **Description**    |
 |-----------|-------------------|-------------------|--------------------|
 | **Source Directory** | `--source <directory>` | `-s <directory>`| Specifies the input directory for PDF files. Default is `./_pdfs` Example: `pdfminion --source ./input`|
-| **Target Directory** | `--target <directory>` | `-t <directory>` | Specifies the output directory for processed files. Default is `_target`. Creates the directory if it doesn’t exist. Example: `pdfminion --target ./out`|
+| **Target Directory** | `--target <directory>` | `-t <directory>` | Specifies the output directory for processed files. Default is `_target`. Creates the directory if it doesn't exist. Example: `pdfminion --target ./out`|
 | **Force Overwrite**  | `--force`              | `-f`    | Allows overwriting existing files in the target directory. Default: `false`. Example: `pdfminion --force` |
 
 <!-- see ADR-0011, config files have been postponed
 | **Config File**  | `--config <filename>`  | `-c <filename>` | Loads configuration from a file. It needs to be a yaml file. Example: `pdfminion --config settings.yaml`  |
 -->
-| **Verbose Mode**    | `--verbose`     |                | Gives detailed processing output. Default: `false`. Example: `pdfminion --verbose` |
+| **Verbose Mode**    | `--verbose`     | `-v`               | Gives detailed processing output. Default: `false`. Example: `pdfminion --verbose` |
 
 
 ### 5.3 Flags for Page Related Settings
@@ -121,7 +123,7 @@ Set the running head, the page- and chapter prefix etc.
 | **Name**  | **Long Name**  | **Shorthand** | **Description**    |
 |-----------|-------------------|-------------------|--------------------|
 | **Running Head**    | `--running-head <text>`    | `-r` | Sets text for the running head at the top of each page. Default  is "" (no header). Example: `pdfminion --running-head "Document Title"`|
-| **Chapter Prefix**  | `--chapter-prefix <text>`  | `-c` | Specifies prefix for chapter numbers. Default: "Chapter". Example: `pdfminion --chapter-prefix "Ch."`|
+| **Chapter Prefix**  | `--chapter-prefix <text>`  | | Specifies prefix for chapter numbers. Default: "Chapter". Note: No shorthand to avoid conflict with `-c` for `--config`. Example: `pdfminion --chapter-prefix "Ch."`|
 | **Page Prefix**     | `--page-prefix <text>`     | `-p` | Sets prefix for page numbers. Default: "Page". Example: `pdfminion --page-prefix "Page"` |
 | **Separator**       | `--separator <symbol>`     |  | Defines the separator between chapter, page number, and total count. Default: `-`. Example: `pdfminion --separator " | "`        |
 | **Page Count Prefix**  | `--page-count-prefix <text>`|  | Sets prefix for total page count. Default: "of". Example: `pdfminion --page-count-prefix "out of"` |
