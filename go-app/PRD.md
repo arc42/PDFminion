@@ -1,22 +1,22 @@
 # Product Requirements Document (PRD): PDFMinion
 - Version: 1.0.0
-- Date: 2025-04-20
+- Date: 2025-11-22
 - Author: Dr Gernot Starke
 
 ## 1. Product Overview
 
 ### 1.1 Document Title and Version
 - PRD: PDFMinion
-- Version: 1.0.0
+- Version: 1.1.0
 
 ### 1.2 Product Summary
-MyGoCLI is a command-line utility written in Go to add page numbers and running-headers on existing pdf documents, helping to produce useful handouts.
+PDFMinion is a command-line utility written in Go to add page numbers and running-headers on existing pdf documents, helping to produce useful handouts.
 
 ## 2. Goals
 
 ### 2.1 Business Goals
 - Help create printable handouts out of existing pdf documents, where each documents is one chapter of the resulting handout, especially by adding page and chapter numbers, running headers and filler pages for pdfs with uneven page count.
-- Enable to create a useful table-of-contents from the existing pdfs.
+- (future) Enable to create a useful table-of-contents from the existing pdfs.
   
 
 ### 2.2 Developer Goals
@@ -84,21 +84,20 @@ These handouts will contain a table-of-contents with the starting page of each c
     * For each of the supported languages, default values for important string constants are predefined in the source code (e.g. page-prefix, chapter-prefix, page-count-prefix)
     * The default language can sometimes be deferred from OS settings. The fallback is English (EN).
     * The language to be used can be specified by a command-line flag (`--language DE` or `--language=DE`)
-  * The runtime behaviour of PDFMininion is controlled via flags and commands via the command line.
+  * The runtime behaviour of PDFMininion is controlled via flags via the command line.
 
-- The following tables contain all commands and flags PDFMinion shall support:
+- The following tables contain all flags PDFMinion shall support:
 
-### 5.2 Commands
+### 5.2 Basic Commands useable via Flags
 
 | **Name**  | **Long Name**  | **Shorthand** | **Description** |
 |-----------|-------------------|-------------------|-----------------|
-| **Help**          | `help`      | `?`| Displays a list of supported commands and their usage.<br>Example: `pdfminion --help`|
-| **List Languages**| `list-languages` | `ll`, `list`   | Lists available languages for the `--language` option.<br>Example: `pdfminion list-languages` |
-| **Settings**      | `settings`  |         | Prints all current settings, like page-prefix, chapter-prefix etc. <br>Example: `pdfminion settings` |
-| **Version**       | `version`   |     | Displays the current version of PDFminion.<br>Example: `pdfminion version` |
-| **Credits**       | `credits`   |         | Gives credit to the maintainers of several OS libraries. <br>Example: `pdfminion credits`  |
+| **Help**          | `--help`      | `?`, `-h`| Displays a list of supported commands and their usage.|
+| **List Languages**| `--list-languages` | `ll`, `list`   | Lists available languages for the `--language` option. |
+| **Version**       | `--version`   | `-v`    | Displays the current version of PDFminion.|
+| **Credits**       | `--credits`   | `-c`    | Gives credit to the maintainers of several OS libraries.  |
 
-If no command is given, all flags are evaluate, validated and PDF processing is started.
+These flags shall be used standalone: If one of them is contained in any command line, its` command is executed and program execution stops normally immediately afterwards.
 
 ### 5.3 Flags for Basic Settings
 
@@ -108,10 +107,7 @@ If no command is given, all flags are evaluate, validated and PDF processing is 
 | **Target Directory** | `--target <directory>` | `-t <directory>` | Specifies the output directory for processed files. Default is `_target`. Creates the directory if it doesn’t exist. Example: `pdfminion --target ./out`|
 | **Force Overwrite**  | `--force`              | `-f`    | Allows overwriting existing files in the target directory. Default: `false`. Example: `pdfminion --force` |
 
-<!-- see ADR-0011, config files have been postponed
-| **Config File**  | `--config <filename>`  | `-c <filename>` | Loads configuration from a file. It needs to be a yaml file. Example: `pdfminion --config settings.yaml`  |
--->
-| **Verbose Mode**    | `--verbose`     |                | Gives detailed processing output. Default: `false`. Example: `pdfminion --verbose` |
+| **Verbose Mode**    | `--verbose`     |                | Gives detailed processing output. Default: `false`. |
 
 
 ### 5.3 Flags for Page Related Settings
@@ -123,10 +119,8 @@ Set the running head, the page- and chapter prefix etc.
 | **Running Head**    | `--running-head <text>`    | `-r` | Sets text for the running head at the top of each page. Default  is "" (no header). Example: `pdfminion --running-head "Document Title"`|
 | **Chapter Prefix**  | `--chapter-prefix <text>`  | `-c` | Specifies prefix for chapter numbers. Default: "Chapter". Example: `pdfminion --chapter-prefix "Ch."`|
 | **Page Prefix**     | `--page-prefix <text>`     | `-p` | Sets prefix for page numbers. Default: "Page". Example: `pdfminion --page-prefix "Page"` |
-| **Separator**       | `--separator <symbol>`     |  | Defines the separator between chapter, page number, and total count. Default: `-`. Example: `pdfminion --separator " | "`        |
 | **Page Count Prefix**  | `--page-count-prefix <text>`|  | Sets prefix for total page count. Default: "of". Example: `pdfminion --page-count-prefix "out of"` |
-| **Evenify**  | `--evenify {=true\|false}`  | `-e {=true\|false}`  | Enables or disables adding blank pages for even page counts. Default: true.  Example: `pdfminion --evenify=false |
-| **Personal Touch**  | `--personal {on\|off}`  |   | Adds a personal touch (aka: Our PDFminion logo) on random pages. Not yet implemented. |
+| **Evenify**  | `--evenify {true\|false}`  | `-e {true\|false}`  | Enables or disables adding blank pages for even page counts. Default: true.  Example: `pdfminion --evenify=false |
 
 Please note: Most of these processing defaults are language-specific: The German language, for example, uses "Seite" for "Page" and "Kapitel" for "Chapter".
 
@@ -148,29 +142,8 @@ With these commands you can change these defaults and provide your own values.
 
 
 
-### 5.5 Flags for File-Related Settings
 
-After all files have been processed, PDFminion can perform some post-processing.
-
-| **Name**  | **Long Name**  | **Shorthand** | **Description** |
-|-----------|-------------------|-------------------|-----------------|
-| **Merge** | `--merge <filename>`       | `-m <filename>` | Merges input files into a single PDF. Uses default name if `<filename>` not provided. Not yet implemented. Example: `pdfminion --merge combined.pdf`   |
-| **Table of Contents**  | `--toc`   |  | Generates a table-of-contents PDF. Not yet implemented. Example: `pdfminion --toc`|
  
-### 5.6 Other Flags
-
-Some commands can alternatively be invoked via flags, for those users who cannot remember the syntax.
-See section 5.2 (Commands) above.
-
-| **Name**  | **Long Name**  | **Shorthand** | **Description** |
-|-----------|-------------------|-------------------|-----------------|
-| **Help** | `--help`       | `-h` | displays the help text (Commends)  |
-| **List Languages**| `--list-languages` | `--ll`, `--list`   | Lists available languages for the `--language` option. |
-| **Settings**      | `--settings`  |         | Prints all current settings, like page-prefix, chapter-prefix etc. <br>Example: `pdfminion --settings` |
-| **Version**       | `--version`   |`-v`     | Displays the current version of PDFminion.|
-| **Credits**       | `--credits`   |         | Gives credit to the maintainers of several OS libraries. |
-
-
 ## 6. Additional Requirements
 - The name of the binary shall be `pdfminion`.
 
@@ -213,7 +186,7 @@ Other make targets shall be required later. The existing Makefile is good enough
 - read and consume external documentation.
 - always try to find the latest version of external documentation or libraries.
 
-- The PDF manipulation code already
+- The PDF manipulation code already exists. Leave that unchanged for now.
 
 ## 10. Current Tasks
 
