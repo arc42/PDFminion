@@ -23,19 +23,19 @@ func TestSetupFlags(t *testing.T) {
 	rootCmd.SetArgs(args)
 
 	// Execute the command to parse flags
+	// NOTE: Execute now triggers PersistentPreRun which loads configuration automatically
 	err := rootCmd.Execute()
 	assert.NoError(t, err, "Failed to execute command")
 
-	// Verify the configuration
+	// Verify viper got the flag values
 	assert.Equal(t, "EN", viper.GetString("language"))
 	assert.Equal(t, "testSourceDir", viper.GetString("source"))
 	assert.Equal(t, "testTargetDir", viper.GetString("target"))
 	assert.True(t, viper.GetBool("force"))
 	assert.False(t, viper.GetBool("evenify"))
 
-	// Verify the MinionConfig
-	minionConfig, err := config.ConfigureApplication(false, rootCmd)
-	assert.NoError(t, err, "Failed to configure application")
+	// Verify the MinionConfig was populated by PersistentPreRun during Execute
+	minionConfig := config.ActiveMinionConfig
 
 	assert.Equal(t, domain.ParseLanguageCode("EN"), minionConfig.Language)
 	assert.Equal(t, "testSourceDir", minionConfig.SourceDir)
@@ -132,12 +132,12 @@ func TestFlagLoadingIntegration(t *testing.T) {
 			rootCmd.SetArgs(tc.args)
 
 			// Execute to parse flags
+			// NOTE: Execute now triggers PersistentPreRun which loads configuration automatically
 			err := rootCmd.Execute()
 			assert.NoError(t, err, "Failed to execute command with args: %v", tc.args)
 
-			// Get the configuration
-			minionConfig, err := config.ConfigureApplication(false, rootCmd)
-			assert.NoError(t, err, "Failed to configure application")
+			// Get the configuration from the global variable set by PersistentPreRun
+			minionConfig := config.ActiveMinionConfig
 
 			// Run test-specific checks
 			tc.checkConfig(t, minionConfig)
