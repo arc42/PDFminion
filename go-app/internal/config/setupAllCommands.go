@@ -18,6 +18,21 @@ var (
 		Use:   "pdfminion",
 		Short: "PDFMinion adds page numbers to PDF files with custom options",
 		Long:  "PDFMinion is a CLI tool to add page numbers to existing PDF files with customizable options like chapter numbers, running headers, and more",
+		// PersistentPreRun runs before any command (including the default RunE)
+		// This is where we configure the application AFTER flags have been parsed
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			// Get verbose flag
+			verbose := viper.GetBool("verbose")
+
+			// Now configure the application with parsed flags
+			var err error
+			ActiveMinionConfig, err = ConfigureApplication(verbose, cmd)
+			if err != nil {
+				log.Error().Err(err).Msg("Error loading configuration")
+				os.Exit(1)
+			}
+			log.Debug().Interface("configuration:", ActiveMinionConfig).Msg("Configuration completed")
+		},
 		// When no subcommand is provided, process PDFs with the given flags
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runPDFProcessing(cmd, args)
@@ -35,34 +50,15 @@ func SetupApplication(appVersion string) *cobra.Command {
 	// Set application version
 	domain.SetAppVersion(appVersion)
 
-	// Setup flags, as some commands need the flags prior to execution
-	// Examples:
-	// --verbose determines kind of output
-	// --language determines several default settings
+	// Setup flags - these need to be defined before commands
 	setupFlags()
 
-	// check if verbose is set
-	verbose = viper.GetBool("verbose")
-	log.Debug().Bool("verbose", verbose).Msg("flag ")
-
-	if verbose {
-		fmt.Printf("verbose mode requested.")
-	}
 	// Setup commands for the root CLI application
 	setupCommands()
 
-	// Create a flag checker for configuration
-	flagChecker := NewCobraFlagChecker(rootCmd)
-
-	// Now that commands are set up, we can configure the application
-	// using our layered approach, see ADR-0008
-	var err error
-	ActiveMinionConfig, err = ConfigureApplication(verbose, flagChecker)
-	if err != nil {
-		log.Error().Err(err).Msg("Error loading configuration")
-		os.Exit(1)
-	}
-	log.Debug().Interface("configuration:", ActiveMinionConfig).Msg("Configuration completed ")
+	// NOTE: Configuration is now loaded in PersistentPreRun (see rootCmd definition above)
+	// This ensures flags are parsed BEFORE we try to read them
+	// Previously we called ConfigureApplication here, which was too early!
 
 	return rootCmd
 }
