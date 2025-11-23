@@ -67,7 +67,7 @@ These handouts will contain a table-of-contents with the starting page of each c
 * **Target directory**: The pdfs processed by PDFMinion shall be put in the target directory.
 * **Evenify**: Chapters in technical or scientific books traditionally start on odd (right-hand) pages to ensure consistency, readability, and prominence, aligning with classic book design practices. To **evenify** a file means adding a blank page at the end of the file if the page-count is odd (1, 3, 5 or such). That means that the first page of every file in a group will always start on the front-page of paper, even in case of double-sided printing.
 * **Chapter**: A single pdf file constitutes a chapter within the resulting handout.
-* **Flag**: (aka configuration settings) control the behaviour of the actual processing. They are given with --, for example `pdfminion --force` or `pdfminion --source ./input`. Flags can have parameters, like the `./input` in the preceeding example of the `--source` flag. Configurations (flags) can also be set via a configuration file, either in users’ home directory or in the current working directory. The default name is `pdfminion.yaml or pdfminion.yml. Other names can be specified with the `--config` flag.
+* **Flag**: (aka configuration settings) control the behaviour of the actual processing. They are given with --, for example `pdfminion --force` or `pdfminion --source ./input`. Flags can have parameters, like the `./input` in the preceeding example of the `--source` flag. Configurations (flags) can also be set via a configuration file located at `~/.config/pdfminion/config.yaml`. This file is optional - if it exists, its settings are used as defaults which can be overridden by command-line flags. Use `pdfminion config` commands to manage the configuration file.
 * **Command**: Commands are executed immediately. They are given without --, for example `pdfminion version`. Only the first command will be executed at a time. Subsequent commands will be ignored.
 * **Running Header**: A constant text (max a single line) that is repeated on top of every page.
 * **Chapter prefix**: A string constant that preceedes the chapter number. In English it is "chapter", in German "Kapitel".
@@ -144,6 +144,53 @@ With these commands you can change these defaults and provide your own values.
 
 
  
+### 5.5 Configuration File Commands
+
+PDFMinion supports an optional configuration file located at `~/.config/pdfminion/config.yaml`. Settings in this file serve as defaults that can be overridden by command-line flags.
+
+| **Command**  | **Description** | **Example** |
+|--------------|-----------------|-------------|
+| `pdfminion config path` | Show the path to the configuration file and whether it exists | `pdfminion config path` |
+| `pdfminion config show` | Display the current contents of the configuration file | `pdfminion config show` |
+| `pdfminion config create` | Create a new configuration file with example settings | `pdfminion config create` |
+| `pdfminion config edit` | Open the configuration file in your default editor ($EDITOR) | `pdfminion config edit` |
+
+**Configuration File Format:**
+The configuration file uses YAML format. All settings are optional. Example:
+
+```yaml
+# Language for text defaults (EN, DE, FR)
+language: DE
+
+# Default directories
+source: /my/pdfs
+target: /my/output
+
+# Processing options
+force: false
+evenify: true
+verbose: false
+
+# Text customization
+running-header: "My Document"
+chapter-prefix: "Chapter"
+page-prefix: "Page"
+separator: " "
+page-count-prefix: "of"
+blank-page-text: "This page intentionally left blank"
+
+# Post-processing
+merge: ""  # Set to filename to enable merging
+toc: false
+personal: false
+```
+
+**Configuration Layering:**
+PDFMinion builds configuration in three layers, with each layer overriding the previous:
+1. **System defaults** - Language-dependent defaults based on detected system language
+2. **Config file** - Settings from `~/.config/pdfminion/config.yaml` (if exists)
+3. **Command-line flags** - Explicitly provided flags (highest priority)
+
 ## 6. Additional Requirements
 - The name of the binary shall be `pdfminion`.
 

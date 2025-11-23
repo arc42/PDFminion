@@ -2,6 +2,9 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -11,18 +14,19 @@ import (
 
 // ConfigureApplication collects configuration from all sources and merges them.
 //
-// LAYERED CONFIGURATION APPROACH:
-// The configuration is built in layers, with each layer overriding the previous one:
+// SIMPLIFIED LAYERED CONFIGURATION APPROACH:
+// The configuration is built in 3 simple layers:
 //
 //	Layer 1 (Base): System language-dependent defaults
 //	  - Detects system language using go-locale library
 //	  - Loads language-specific text defaults (e.g., German uses "Seite" for page)
 //	  - Falls back to English if language is not supported
 //
-//	Layer 2 (Config File): Configuration file (if specified)
-//	  - Loaded via --config flag
+//	Layer 2 (Config File): Home directory config file (if exists)
+//	  - Location: ~/.config/pdfminion/config.yaml
 //	  - YAML format
-//	  - Note: Config file support is currently postponed (see ADR-0011)
+//	  - Optional - if not found, no error
+//	  - No --config flag needed - just put file in standard location
 //
 //	Layer 3 (CLI Flags): Command-line flags (highest priority)
 //	  - Override all previous layers
@@ -49,22 +53,17 @@ func ConfigureApplication(verbose bool, cmd *cobra.Command) (domain.MinionConfig
 	log.Debug().Str("language", systemLang.String()).Msg("detected")
 	minionConfig := loadDefaultConfig()
 
-	// 2. Load from config file if specified
-	if cmd.Flags().Changed("config") {
-		configFile := viper.GetString("config")
-		if configFile != "" {
-			if fileConfig, err := loadConfigFile(configFile, verbose); err == nil {
-				if verbose {
-					fmt.Printf("Merging configuration from file: %s\n", configFile)
-				}
-				err := minionConfig.MergeWith(fileConfig)
-				if err != nil {
-					log.Warn().Err(err).Msg("Failed to merge file configuration")
-				}
-			} else {
-				log.Warn().Err(err).Str("file", configFile).Msg("Failed to load config file")
-			}
+	// 2. Load from home config file if it exists
+	if homeConfig, err := loadHomeConfig(verbose); err == nil {
+		if verbose {
+			fmt.Printf("Merging configuration from: %s\n", GetConfigPath())
 		}
+		err := minionConfig.MergeWith(homeConfig)
+		if err != nil {
+			log.Warn().Err(err).Msg("Failed to merge home config")
+		}
+	} else {
+		log.Debug().Err(err).Msg("No home config file found (this is OK)")
 	}
 
 	// 3. Override with command line flags
@@ -208,6 +207,34 @@ func loadFlagConfig(cmd *cobra.Command) domain.MinionConfig {
 	}
 
 	return fconfig
+}
+
+// GetConfigPath returns the path to the home config file
+func GetConfigPath() string {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Warn().Err(err).Msg("Failed to get user home directory")
+		return ""
+	}
+	return filepath.Join(homeDir, ".config", "pdfminion", "config.yaml")
+}
+
+// loadHomeConfig loads configuration from ~/.config/pdfminion/config.yaml
+// Returns an error if the file doesn't exist (which is OK - not all users need a config file)
+func loadHomeConfig(verbose bool) (domain.MinionConfig, error) {
+	configPath := GetConfigPath()
+
+	// Check if file exists
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		return domain.MinionConfig{}, err // File not found - this is OK
+	}
+
+	if verbose {
+		fmt.Printf("Found config file: %s\n", configPath)
+	}
+	log.Debug().Str("file", configPath).Msg("Loading home config file")
+
+	return loadConfigFile(configPath, verbose)
 }
 
 // loadConfigFile loads configuration from the specified YAML file

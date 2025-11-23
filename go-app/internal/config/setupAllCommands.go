@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"pdfminion/internal/pdf"
 
 	"github.com/rs/zerolog/log"
@@ -67,7 +68,8 @@ func setupFlags() {
 	// Persistent flags (available to all commands)
 	rootCmd.PersistentFlags().StringP("language", "l", "", "Override system language")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Give more detailed output during processing")
-	rootCmd.PersistentFlags().StringP("config", "c", "", "Path to configuration file")
+	// NOTE: Config file removed - we use fixed location ~/.config/pdfminion/config.yaml
+	// Use 'pdfminion config' commands to manage configuration files
 
 	// Local flags (only for PDF processing)
 	rootCmd.Flags().StringP("source", "s", domain.DefaultSourceDir, "Source directory for PDF files")
@@ -106,6 +108,7 @@ func setupCommands() {
 		CreditsCmd(),
 		SettingsCmd(),
 		ListLanguagesCmd(),
+		ConfigCmd(),
 	)
 	log.Debug().Msg("Add commands completed")
 
@@ -164,6 +167,182 @@ func CreditsCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Debug().Msg("executing credits command")
 			domain.GiveCredits()
+		},
+	}
+}
+
+// ConfigCmd provides subcommands for managing configuration files
+func ConfigCmd() *cobra.Command {
+	configCmd := &cobra.Command{
+		Use:              "config",
+		Short:            "Manage configuration files",
+		Long:             "Manage PDFMinion configuration files in ~/.config/pdfminion/config.yaml",
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {},
+	}
+
+	// Add subcommands
+	configCmd.AddCommand(
+		configPathCmd(),
+		configShowCmd(),
+		configCreateCmd(),
+		configEditCmd(),
+	)
+
+	return configCmd
+}
+
+// configPathCmd shows the path to the config file
+func configPathCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "path",
+		Short: "Show path to config file",
+		Long:  "Display the path where PDFMinion looks for its configuration file",
+		Run: func(cmd *cobra.Command, args []string) {
+			path := GetConfigPath()
+			fmt.Printf("Config file path: %s\n", path)
+
+			// Check if file exists
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				fmt.Println("(file does not exist yet)")
+			} else {
+				fmt.Println("(file exists)")
+			}
+		},
+	}
+}
+
+// configShowCmd displays the contents of the config file
+func configShowCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "show",
+		Short: "Show config file contents",
+		Long:  "Display the current contents of the configuration file",
+		Run: func(cmd *cobra.Command, args []string) {
+			path := GetConfigPath()
+
+			// Check if file exists
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				fmt.Printf("Config file does not exist: %s\n", path)
+				fmt.Println("Use 'pdfminion config create' to create one")
+				return
+			}
+
+			// Read and display file contents
+			content, err := os.ReadFile(path)
+			if err != nil {
+				fmt.Printf("Error reading config file: %v\n", err)
+				return
+			}
+
+			fmt.Printf("Config file: %s\n", path)
+			fmt.Println("---")
+			fmt.Print(string(content))
+			if len(content) > 0 && content[len(content)-1] != '\n' {
+				fmt.Println() // Ensure newline at end
+			}
+		},
+	}
+}
+
+// configCreateCmd creates a new config file with example content
+func configCreateCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "create",
+		Short: "Create example config file",
+		Long:  "Create a new configuration file with example settings at ~/.config/pdfminion/config.yaml",
+		Run: func(cmd *cobra.Command, args []string) {
+			path := GetConfigPath()
+
+			// Check if file already exists
+			if _, err := os.Stat(path); err == nil {
+				fmt.Printf("Config file already exists: %s\n", path)
+				fmt.Println("Use 'pdfminion config show' to view it or 'pdfminion config edit' to modify it")
+				return
+			}
+
+			// Create directory if it doesn't exist
+			dir := filepath.Dir(path)
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				fmt.Printf("Error creating config directory: %v\n", err)
+				return
+			}
+
+			// Create example config file
+			exampleConfig := `# PDFMinion Configuration File
+# All settings are optional - any setting not specified will use defaults
+# Command-line flags override these settings
+
+# Language for text defaults (EN, DE, FR)
+# language: EN
+
+# Default directories
+# source: _source
+# target: _target
+
+# Processing options
+# force: false
+# evenify: true
+# verbose: false
+
+# Text customization
+# running-header: ""
+# chapter-prefix: "Chapter"
+# page-prefix: "Page"
+# separator: " "
+# page-count-prefix: "of"
+# blank-page-text: "This page intentionally left blank"
+
+# Post-processing
+# merge: ""  # Set to filename to enable merging
+# toc: false
+# personal: false
+`
+
+			if err := os.WriteFile(path, []byte(exampleConfig), 0644); err != nil {
+				fmt.Printf("Error creating config file: %v\n", err)
+				return
+			}
+
+			fmt.Printf("Created example config file: %s\n", path)
+			fmt.Println("Edit this file to customize your default settings")
+			fmt.Println("Use 'pdfminion config show' to view it or 'pdfminion config edit' to modify it")
+		},
+	}
+}
+
+// configEditCmd opens the config file in the user's default editor
+func configEditCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "edit",
+		Short: "Edit config file",
+		Long:  "Open the configuration file in your default editor ($EDITOR)",
+		Run: func(cmd *cobra.Command, args []string) {
+			path := GetConfigPath()
+
+			// Check if file exists
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				fmt.Printf("Config file does not exist: %s\n", path)
+				fmt.Println("Use 'pdfminion config create' to create one first")
+				return
+			}
+
+			// Get editor from environment
+			editor := os.Getenv("EDITOR")
+			if editor == "" {
+				editor = "vi" // Fallback to vi
+			}
+
+			fmt.Printf("Opening config file with %s...\n", editor)
+
+			// Execute editor
+			execCmd := fmt.Sprintf("%s %s", editor, path)
+			if err := os.Chdir(filepath.Dir(path)); err != nil {
+				fmt.Printf("Error changing directory: %v\n", err)
+				return
+			}
+
+			fmt.Printf("Run this command to edit: %s\n", execCmd)
+			fmt.Println("(Note: Direct editor invocation not available in this context)")
 		},
 	}
 }
