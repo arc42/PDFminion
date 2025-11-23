@@ -22,3 +22,4 @@ go-app/build
 *.bkp
 *.dtmp
 go-app/coverage.html
+go-app/pdfminion
